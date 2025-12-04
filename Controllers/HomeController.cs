@@ -1,25 +1,51 @@
-using System.Diagnostics;
-using GestaoFinanceiraPessoal.Models;
+using GestaoFinanceiraPessoal.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
+    [Route("")]
+    [Route("dashboard")]
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly AppDbContext _context;
+
+        public HomeController(AppDbContext context)
         {
-            return View();
+            _context = context;
         }
 
-        public IActionResult Privacy()
+        [HttpGet("")]
+        public async Task<IActionResult> Index(int? ano, int? mes)
         {
-            return View();
-        }
+            var anoAtual = ano ?? DateTime.Now.Year;
+            var mesAtual = mes ?? DateTime.Now.Month;
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var receitasMes = await _context.Receitas
+                .Where(r => r.Ano == anoAtual && r.Mes == mesAtual)
+                .SumAsync(r => (decimal?)r.Valor) ?? 0;
+
+            var despesasMes = await _context.Despesas
+                .Where(d => d.Data.Year == anoAtual && d.Data.Month == mesAtual)
+                .SumAsync(d => (decimal?)d.Valor) ?? 0;
+
+            var saldo = receitasMes - despesasMes;
+
+            var ultimasMovimentacoes = await _context.Despesas
+                .Where(d => d.Data.Year == anoAtual && d.Data.Month == mesAtual)
+                .Include(d => d.Categoria)
+                .OrderByDescending(d => d.Data)
+                .Take(5)
+                .ToListAsync();
+
+            ViewBag.Ano = anoAtual;
+            ViewBag.Mes = mesAtual;
+            ViewBag.Saldo = saldo;
+            ViewBag.TotalReceitas = receitasMes;
+            ViewBag.TotalDespesas = despesasMes;
+            ViewBag.Ultimas = ultimasMovimentacoes;
+
+            return View();
         }
     }
 }
