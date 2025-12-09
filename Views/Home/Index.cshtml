@@ -1,8 +1,53 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard - Gestão Financeira";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container py-5">
+
+    <!-- Título centralizado -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">Bem-vindo ao Sistema de Gestão Financeira Pessoal</h1>
+        <p class="lead mt-3 text-secondary">
+            Organize suas receitas, despesas e categorias de forma simples e eficiente.
+        </p>
+    </div>
+
+    <!-- Cards centralizados em grid -->
+    <div class="row justify-content-center g-4">
+
+        <!-- Card Receitas -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">Receitas</h5>
+                    <p class="text-secondary">Gerencie suas entradas financeiras.</p>
+                    <a href="/Receitas" class="btn btn-primary px-4">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Despesas -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">Despesas</h5>
+                    <p class="text-secondary">Controle seus gastos e pagamentos.</p>
+                    <a href="/Despesas" class="btn btn-primary px-4">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Categorias -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">Categorias</h5>
+                    <p class="text-secondary">Organize suas receitas e despesas por categoria.</p>
+                    <a href="/Categorias" class="btn btn-primary px-4">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>

@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container py-4">
+
+    <h2 class="mb-4 fw-bold">Dashboard Financeiro</h2>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Saldo do Mês</h6>
+                    <h3 class="fw-bold">@ViewBag.Saldo.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Receitas</h6>
+                    <h3 class="text-success fw-bold">@ViewBag.TotalReceitas.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Despesas</h6>
+                    <h3 class="text-danger fw-bold">@ViewBag.TotalDespesas.ToString("C")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <h4 class="fw-semibold mb-3">Últimas Movimentações</h4>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Descrição</th>
+                        <th class="text-end">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ViewBag.Ultimas)
+                    {
+                        <tr>
+                            <td>@item.Data.ToString("dd/MM/yyyy")</td>
+                            <td>@item.Categoria?.Nome</td>
+                            <td>@item.Descricao</td>
+                            <td class="text-end text-danger fw-bold">@item.Valor.ToString("C")</td>
+                        </tr>
+                    }
+
+                    @if (ViewBag.Ultimas.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-3 text-muted">
+                                Nenhuma movimentação encontrada.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
