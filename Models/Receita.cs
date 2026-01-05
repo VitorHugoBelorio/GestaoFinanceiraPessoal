@@ -1,5 +1,4 @@
-﻿using GestaoFinanceiraPessoal.Enuns;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GestaoFinanceiraPessoal.Models
 {
@@ -7,19 +6,13 @@ namespace GestaoFinanceiraPessoal.Models
     {
         public int Id { get; set; }
 
-        [Required]
         public string Descricao { get; set; }
-
-        [Required]
         public decimal Valor { get; set; }
 
-        [Required]
-        public int Mes { get; set; }
+        public DateTime Data { get; set; }
 
-        [Required]
-        public int Ano { get; set; }
-
-        [Required]
-        public ETiposReceita Tipo { get; set; }
+        public int? RecorrenciaId { get; set; }
+        public Recorrencia? Recorrencia { get; set; }
     }
+
 }

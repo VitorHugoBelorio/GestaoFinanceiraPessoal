@@ -1,7 +1,6 @@
 ﻿using GestaoFinanceiraPessoal.Models;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace GestaoFinanceiraPessoal.Data
 {
     public class AppDbContext : DbContext
@@ -13,6 +12,8 @@ namespace GestaoFinanceiraPessoal.Data
         public DbSet<Receita> Receitas { get; set; }
         public DbSet<Despesa> Despesas { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
+
+        public DbSet<Recorrencia> Recorrencias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

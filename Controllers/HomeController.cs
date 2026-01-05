@@ -22,7 +22,7 @@ namespace GestaoFinanceiraPessoal.Controllers
             var mesAtual = mes ?? DateTime.Now.Month;
 
             var receitasMes = await _context.Receitas
-                .Where(r => r.Ano == anoAtual && r.Mes == mesAtual)
+                .Where(r => r.Data.Year == anoAtual && r.Data.Month == mesAtual)
                 .SumAsync(r => (decimal?)r.Valor) ?? 0;
 
             var despesasMes = await _context.Despesas

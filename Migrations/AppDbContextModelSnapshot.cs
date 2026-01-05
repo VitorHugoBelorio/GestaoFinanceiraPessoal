@@ -57,7 +57,7 @@ namespace GestaoFinanceiraPessoal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Tipo")
+                    b.Property<int?>("RecorrenciaId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
@@ -66,6 +66,8 @@ namespace GestaoFinanceiraPessoal.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
+
+                    b.HasIndex("RecorrenciaId");
 
                     b.ToTable("Despesas");
                 });
@@ -78,17 +80,14 @@ namespace GestaoFinanceiraPessoal.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Ano")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("Data")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Mes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Tipo")
+                    b.Property<int?>("RecorrenciaId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
@@ -96,7 +95,34 @@ namespace GestaoFinanceiraPessoal.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RecorrenciaId");
+
                     b.ToTable("Receitas");
+                });
+
+            modelBuilder.Entity("GestaoFinanceiraPessoal.Models.Recorrencia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativa")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DataInicio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Recorrencias");
                 });
 
             modelBuilder.Entity("GestaoFinanceiraPessoal.Models.User", b =>
@@ -128,7 +154,22 @@ namespace GestaoFinanceiraPessoal.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GestaoFinanceiraPessoal.Models.Recorrencia", "Recorrencia")
+                        .WithMany()
+                        .HasForeignKey("RecorrenciaId");
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("Recorrencia");
+                });
+
+            modelBuilder.Entity("GestaoFinanceiraPessoal.Models.Receita", b =>
+                {
+                    b.HasOne("GestaoFinanceiraPessoal.Models.Recorrencia", "Recorrencia")
+                        .WithMany()
+                        .HasForeignKey("RecorrenciaId");
+
+                    b.Navigation("Recorrencia");
                 });
 
             modelBuilder.Entity("GestaoFinanceiraPessoal.Models.Categoria", b =>
