@@ -1,6 +1,6 @@
 ﻿using GestaoFinanceiraPessoal.Data;
-using GestaoFinanceiraPessoal.Enums;
 using GestaoFinanceiraPessoal.Models;
+using GestaoFinanceiraPessoal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +10,17 @@ namespace GestaoFinanceiraPessoal.Controllers
     public class DespesaController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly RecorrenciaService _recorrenciaService;
 
-        public DespesaController(AppDbContext context)
+        public DespesaController(
+            AppDbContext context,
+            RecorrenciaService recorrenciaService)
         {
             _context = context;
+            _recorrenciaService = recorrenciaService;
         }
 
+        // LISTAGEM
         [HttpGet("")]
         public async Task<IActionResult> Index(int mes, int ano)
         {
@@ -28,17 +33,16 @@ namespace GestaoFinanceiraPessoal.Controllers
                 .Include(d => d.Categoria)
                 .Include(d => d.Recorrencia)
                 .Where(d =>
-                    // Variáveis
+                    // Variáveis (sem recorrência)
                     (d.RecorrenciaId == null &&
                      d.Data.Month == mes &&
                      d.Data.Year == ano)
 
                     ||
 
-                    // Fixas
+                    // Fixas (recorrentes)
                     (d.RecorrenciaId != null &&
-                     d.Recorrencia.Ativa &&
-                     d.Recorrencia.DataInicio <= dataReferencia &&
+                     d.Recorrencia.ProximaExecucao <= dataReferencia &&
                      (d.Recorrencia.DataFim == null || d.Recorrencia.DataFim >= dataReferencia))
                 )
                 .ToListAsync();
@@ -49,6 +53,7 @@ namespace GestaoFinanceiraPessoal.Controllers
             return View(despesas);
         }
 
+        // FORM CREATE
         [HttpGet("novo")]
         public async Task<IActionResult> Create()
         {
@@ -56,6 +61,7 @@ namespace GestaoFinanceiraPessoal.Controllers
             return View();
         }
 
+        // CREATE
         [HttpPost("")]
         public async Task<IActionResult> Create(Despesa model, bool recorrente)
         {
@@ -67,17 +73,8 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             if (recorrente)
             {
-                var recorrencia = new Recorrencia
-                {
-                    DataInicio = model.Data,
-                    Tipo = ETipoRecorrencia.Mensal,
-                    Ativa = true
-                };
-
-                _context.Recorrencias.Add(recorrencia);
-                await _context.SaveChangesAsync();
-
-                model.RecorrenciaId = recorrencia.Id;
+                model.Recorrencia = _recorrenciaService
+                    .CriarRecorrencia(model.Data);
             }
 
             _context.Despesas.Add(model);
@@ -86,6 +83,7 @@ namespace GestaoFinanceiraPessoal.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // DELETE
         [HttpGet("{id:int}/excluir")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -93,12 +91,12 @@ namespace GestaoFinanceiraPessoal.Controllers
                 .Include(d => d.Recorrencia)
                 .FirstOrDefaultAsync(d => d.Id == id);
 
-            if (despesa == null) return NotFound();
+            if (despesa == null)
+                return NotFound();
 
             if (despesa.Recorrencia != null)
             {
-                despesa.Recorrencia.Ativa = false;
-                _context.Recorrencias.Update(despesa.Recorrencia);
+                _recorrenciaService.Desativar(despesa.Recorrencia);
             }
             else
             {

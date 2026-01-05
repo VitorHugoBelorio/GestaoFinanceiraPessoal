@@ -1,6 +1,6 @@
 ﻿using GestaoFinanceiraPessoal.Data;
-using GestaoFinanceiraPessoal.Enums;
 using GestaoFinanceiraPessoal.Models;
+using GestaoFinanceiraPessoal.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +10,17 @@ namespace GestaoFinanceiraPessoal.Controllers
     public class ReceitaController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly RecorrenciaService _recorrenciaService;
 
-        public ReceitaController(AppDbContext context)
+        public ReceitaController(
+            AppDbContext context,
+            RecorrenciaService recorrenciaService)
         {
             _context = context;
+            _recorrenciaService = recorrenciaService;
         }
 
+        // LISTAGEM
         [HttpGet("")]
         public async Task<IActionResult> Index(int mes, int ano)
         {
@@ -27,17 +32,16 @@ namespace GestaoFinanceiraPessoal.Controllers
             var receitas = await _context.Receitas
                 .Include(r => r.Recorrencia)
                 .Where(r =>
-                    // Variáveis (sem recorrência)
+                    // Variáveis
                     (r.RecorrenciaId == null &&
                      r.Data.Month == mes &&
                      r.Data.Year == ano)
 
                     ||
 
-                    // Fixas (recorrentes)
+                    // Fixas
                     (r.RecorrenciaId != null &&
-                     r.Recorrencia.Ativa &&
-                     r.Recorrencia.DataInicio <= dataReferencia &&
+                     r.Recorrencia.ProximaExecucao <= dataReferencia &&
                      (r.Recorrencia.DataFim == null || r.Recorrencia.DataFim >= dataReferencia))
                 )
                 .ToListAsync();
@@ -48,9 +52,11 @@ namespace GestaoFinanceiraPessoal.Controllers
             return View(receitas);
         }
 
+        // FORM CREATE
         [HttpGet("novo")]
         public IActionResult Create() => View();
 
+        // CREATE
         [HttpPost("novo")]
         public async Task<IActionResult> Create(Receita model, bool recorrente)
         {
@@ -59,17 +65,8 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             if (recorrente)
             {
-                var recorrencia = new Recorrencia
-                {
-                    DataInicio = model.Data,
-                    Tipo = ETipoRecorrencia.Mensal,
-                    Ativa = true
-                };
-
-                _context.Recorrencias.Add(recorrencia);
-                await _context.SaveChangesAsync();
-
-                model.RecorrenciaId = recorrencia.Id;
+                model.Recorrencia = _recorrenciaService
+                    .CriarRecorrencia(model.Data);
             }
 
             _context.Receitas.Add(model);
@@ -78,6 +75,7 @@ namespace GestaoFinanceiraPessoal.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // DELETE
         [HttpGet("excluir/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -85,13 +83,12 @@ namespace GestaoFinanceiraPessoal.Controllers
                 .Include(r => r.Recorrencia)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (receita == null) return NotFound();
+            if (receita == null)
+                return NotFound();
 
-            // Se tiver recorrência, apenas desativa
             if (receita.Recorrencia != null)
             {
-                receita.Recorrencia.Ativa = false;
-                _context.Recorrencias.Update(receita.Recorrencia);
+                _recorrenciaService.Desativar(receita.Recorrencia);
             }
             else
             {
