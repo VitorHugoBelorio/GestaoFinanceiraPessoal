@@ -1,0 +1,48 @@
+﻿@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Cadastre-se";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card shadow-sm mt-5">
+            <div class="card-body">
+                <h4 class="text-center mb-4">Criar conta</h4>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Usuário</label>
+                        <input name="username" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Senha</label>
+                        <input type="password" name="password" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar senha</label>
+                        <input type="password" name="confirmPassword" class="form-control" required />
+                    </div>
+
+                    <button class="btn btn-dark w-100">
+                        Cadastrar
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href="/auth/login" class="text-decoration-none">
+                        Já tenho uma conta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

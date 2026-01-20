@@ -1,0 +1,36 @@
+﻿@model IEnumerable<GestaoFinanceiraPessoal.Models.Despesa>
+
+<h3 class="mb-3">Despesas</h3>
+
+<a class="btn btn-dark mb-3" href="/despesas/novo">
+    <i class="bi bi-plus-circle"></i> Nova despesa
+</a>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Valor</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.Data.ToString("dd/MM/yyyy")</td>
+                <td>@d.Descricao</td>
+                <td>@d.Categoria?.Nome</td>
+                <td class="text-danger">R$ @d.Valor.ToString("N2")</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-danger"
+                       href="/despesas/@d.Id/excluir">
+                        Excluir
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

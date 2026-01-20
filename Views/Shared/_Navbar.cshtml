@@ -1,0 +1,68 @@
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <!-- Logo / Nome do sistema -->
+        <a class="navbar-brand fw-bold" href="/">Financeiro</a>
+
+        <!-- Botão mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Conteúdo -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Menu à esquerda -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Dashboard</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/receitas">Receitas</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/despesas">Despesas</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/categoria">Categorias</a>
+                </li>
+            </ul>
+
+            <!-- Área do usuário (direita) -->
+            <ul class="navbar-nav ms-auto">
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            @User.Identity.Name
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="/auth/logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    Sair
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">
+                            Entrar
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
