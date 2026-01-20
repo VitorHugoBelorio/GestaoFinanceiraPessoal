@@ -1,11 +1,14 @@
 ﻿using GestaoFinanceiraPessoal.Data;
 using GestaoFinanceiraPessoal.Models;
 using GestaoFinanceiraPessoal.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
+
+    [Authorize]
     [Route("receitas")]
     public class ReceitaController : Controller
     {

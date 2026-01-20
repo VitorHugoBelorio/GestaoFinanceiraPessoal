@@ -1,9 +1,12 @@
 using GestaoFinanceiraPessoal.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
+
+    [Authorize]
     [Route("")]
     [Route("dashboard")]
     public class HomeController : Controller

@@ -1,10 +1,12 @@
 ﻿using GestaoFinanceiraPessoal.Data;
 using GestaoFinanceiraPessoal.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
+    [Authorize]
     [Route("categoria")]
     public class CategoriaController : Controller
     {
