@@ -15,11 +15,15 @@
                         @ViewBag.Error
                     </div>
                 }
-
                 <form method="post">
                     <div class="mb-3">
-                        <label class="form-label">Usuário</label>
+                        <label class="form-label">Nome de usuário</label>
                         <input name="username" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">E-mail</label>
+                        <input type="email" name="email" class="form-control" required />
                     </div>
 
                     <div class="mb-3">
