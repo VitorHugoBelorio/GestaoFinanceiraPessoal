@@ -33,25 +33,26 @@ namespace GestaoFinanceiraPessoal.Controllers
 
         // POST: /auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
             var passwordHash = HashPassword(password);
 
             var user = await _context.Users
                 .FirstOrDefaultAsync(u =>
-                    u.Username == username &&
+                    u.Email == email &&
                     u.PasswordHash == passwordHash);
 
             if (user == null)
             {
-                ViewBag.Error = "Usuário ou senha inválidos";
+                ViewBag.Error = "E-mail ou senha inválidos";
                 return View();
             }
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
             var identity = new ClaimsIdentity(
@@ -66,6 +67,7 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
 
         // GET: /auth/logout
         [HttpGet("logout")]
@@ -94,6 +96,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(
             string username,
+            string email,
             string password,
             string confirmPassword)
         {
@@ -104,17 +107,18 @@ namespace GestaoFinanceiraPessoal.Controllers
             }
 
             var exists = await _context.Users
-                .AnyAsync(u => u.Username == username);
+                .AnyAsync(u => u.Username == username || u.Email == email);
 
             if (exists)
             {
-                ViewBag.Error = "Usuário já existe";
+                ViewBag.Error = "Usuário ou e-mail já cadastrado";
                 return View();
             }
 
             var user = new User
             {
                 Username = username,
+                Email = email,
                 PasswordHash = HashPassword(password)
             };
 
@@ -123,6 +127,7 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             return RedirectToAction("Login");
         }
+
 
         // GET
         [HttpGet("forgot-password")]
