@@ -1,0 +1,40 @@
+@model GestaoFinanceiraPessoal.Models.Receita
+
+@{
+    ViewData["Title"] = "Editar Receita";
+}
+
+<h3 class="mb-3">Editar receita</h3>
+
+<form method="post" action="/receitas/editar/@Model.Id">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label class="form-label">Descrição</label>
+        <input asp-for="Descricao" class="form-control" />
+        <span asp-validation-for="Descricao" class="text-danger small"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Valor</label>
+        <input asp-for="Valor" class="form-control js-currency" />
+        <span asp-validation-for="Valor" class="text-danger small"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Data</label>
+        <input asp-for="Data" type="date" class="form-control" />
+        <span asp-validation-for="Data" class="text-danger small"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="recorrente" id="recorrente" @(Model.RecorrenciaId != null ? "checked" : "") />
+        <label class="form-check-label" for="recorrente">Receita fixa (recorrente)</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-controller="Receita" asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+</form>
