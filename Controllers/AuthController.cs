@@ -3,6 +3,7 @@ using GestaoFinanceiraPessoal.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -21,6 +22,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         }
 
         // GET: /auth/login
+        [AllowAnonymous]
         [HttpGet("login")]
         public IActionResult Login()
         {
@@ -32,6 +34,7 @@ namespace GestaoFinanceiraPessoal.Controllers
 
 
         // POST: /auth/login
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(string email, string password)
         {
@@ -70,6 +73,7 @@ namespace GestaoFinanceiraPessoal.Controllers
 
 
         // GET: /auth/logout
+        [AllowAnonymous]
         [HttpGet("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -89,10 +93,12 @@ namespace GestaoFinanceiraPessoal.Controllers
         }
 
         // GET: /auth/register
+        [AllowAnonymous]
         [HttpGet("register")]
         public IActionResult Register() => View();
 
         // POST: /auth/register
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register(
             string username,
@@ -130,10 +136,12 @@ namespace GestaoFinanceiraPessoal.Controllers
 
 
         // GET
+        [AllowAnonymous]
         [HttpGet("forgot-password")]
         public IActionResult ForgotPassword() => View();
 
         // POST (placeholder)
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public IActionResult ForgotPassword(string username)
         {

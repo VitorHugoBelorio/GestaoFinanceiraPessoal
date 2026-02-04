@@ -11,6 +11,10 @@ namespace GestaoFinanceiraPessoal.Models
         [Required(ErrorMessage = "O nome é obrigatório")]
         public string Nome { get; set; } = string.Empty;
 
-        public List<Despesa> Despesas { get; set; }
+        // Owned despesas
+        public List<Despesa> Despesas { get; set; } = new List<Despesa>();
+
+        // Foreign key to identify owner (User)
+        public int UserId { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using GestaoFinanceiraPessoal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
@@ -32,10 +33,12 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             var dataReferencia = new DateTime(ano, mes, 1);
 
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var despesas = await _context.Despesas
                 .Include(d => d.Categoria)
                 .Include(d => d.Recorrencia)
-                .Where(d =>
+                .Where(d => d.UserId == userId && (
                     // Variáveis (sem recorrência)
                     (d.RecorrenciaId == null &&
                      d.Data.Month == mes &&
@@ -47,7 +50,7 @@ namespace GestaoFinanceiraPessoal.Controllers
                     (d.RecorrenciaId != null &&
                      d.Recorrencia.ProximaExecucao <= dataReferencia &&
                      (d.Recorrencia.DataFim == null || d.Recorrencia.DataFim >= dataReferencia))
-                )
+                ))
                 .ToListAsync();
 
             ViewBag.Mes = mes;
@@ -60,7 +63,10 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpGet("novo")]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Categorias = await _context.Categorias.ToListAsync();
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            ViewBag.Categorias = await _context.Categorias
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
             return View();
         }
 
@@ -68,9 +74,13 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpPost("")]
         public async Task<IActionResult> Create(Despesa model, bool recorrente)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             if (!ModelState.IsValid)
             {
-                ViewBag.Categorias = await _context.Categorias.ToListAsync();
+                ViewBag.Categorias = await _context.Categorias
+                    .Where(c => c.UserId == userId)
+                    .ToListAsync();
                 return View(model);
             }
 
@@ -79,6 +89,8 @@ namespace GestaoFinanceiraPessoal.Controllers
                 model.Recorrencia = _recorrenciaService
                     .CriarRecorrencia(model.Data);
             }
+
+            model.UserId = userId;
 
             _context.Despesas.Add(model);
             await _context.SaveChangesAsync();
@@ -90,9 +102,11 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpGet("{id:int}/excluir")]
         public async Task<IActionResult> Delete(int id)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var despesa = await _context.Despesas
                 .Include(d => d.Recorrencia)
-                .FirstOrDefaultAsync(d => d.Id == id);
+                .FirstOrDefaultAsync(d => d.Id == id && d.UserId == userId);
 
             if (despesa == null)
                 return NotFound();

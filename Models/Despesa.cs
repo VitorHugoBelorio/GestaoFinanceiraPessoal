@@ -17,6 +17,9 @@ namespace GestaoFinanceiraPessoal.Models
 
         public int? RecorrenciaId { get; set; }
         public Recorrencia? Recorrencia { get; set; }
+
+        // Foreign key to identify owner (User)
+        public int UserId { get; set; }
     }
 
 }

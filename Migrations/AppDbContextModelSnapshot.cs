@@ -34,6 +34,9 @@ namespace GestaoFinanceiraPessoal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Categorias");
@@ -58,6 +61,9 @@ namespace GestaoFinanceiraPessoal.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RecorrenciaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
@@ -88,6 +94,9 @@ namespace GestaoFinanceiraPessoal.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RecorrenciaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Valor")
