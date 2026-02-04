@@ -1,7 +1,8 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+﻿@{ var currentController = ViewContext.RouteData.Values["controller"]?.ToString().ToLower(); }
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <!-- Logo / Nome do sistema -->
-        <a class="navbar-brand fw-bold" href="/">Financeiro</a>
+        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">Gestão Financeira</a>
 
         <!-- Botão mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -14,19 +15,19 @@
             <!-- Menu à esquerda -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2">
                 <li class="nav-item">
-                    <a class="nav-link" href="/">Dashboard</a>
+                    <a class="nav-link @(currentController == "home" ? "active" : "")" asp-controller="Home" asp-action="Index">Dashboard</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/receitas">Receitas</a>
+                    <a class="nav-link @(currentController == "receita" ? "active" : "")" href="/receitas">Receitas</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/despesas">Despesas</a>
+                    <a class="nav-link @(currentController == "despesa" ? "active" : "")" asp-controller="Despesa" asp-action="Index">Despesas</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/categoria">Categorias</a>
+                    <a class="nav-link @(currentController == "categoria" ? "active" : "")" asp-controller="Categoria" asp-action="Index">Categorias</a>
                 </li>
             </ul>
 
@@ -57,9 +58,7 @@
                 else
                 {
                     <li class="nav-item">
-                        <a class="nav-link" href="/auth/login">
-                            Entrar
-                        </a>
+                        <a class="nav-link" asp-controller="Auth" asp-action="Login">Entrar</a>
                     </li>
                 }
             </ul>
