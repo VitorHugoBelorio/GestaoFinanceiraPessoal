@@ -3,112 +3,139 @@
     decimal saldo = ViewBag.Saldo;
 }
 
-<div class="container mt-4">
-
-    <!-- Título -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="mb-0">Resumo do mês</h3>
-            <small class="text-muted">
-                @ViewBag.Mes/@ViewBag.Ano
-            </small>
-        </div>
+<!-- Hero Section -->
+<div class="hero">
+    <div class="mb-5">
+        <small class="text-muted">Bem-vindo de volta</small>
+        <h1>Seu Panorama Financeiro</h1>
+        <p class="text-muted">@ViewBag.Mes/@ViewBag.Ano</p>
     </div>
+</div>
 
-    <!-- Cards principais -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <small class="text-muted">Receitas</small>
-                    <h4 class="text-success mb-0">
-                        R$ @ViewBag.TotalReceitas.ToString("N2")
-                    </h4>
+<!-- Cards principais -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card card-accent-green">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <small class="text-muted">RECEITAS</small>
+                        <h4 class="text-success mb-0">
+                            R$ @ViewBag.TotalReceitas.ToString("N2")
+                        </h4>
+                    </div>
+                    <i class="bi bi-arrow-up-circle" style="color: var(--accent-green); font-size: 2rem;"></i>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <small class="text-muted">Despesas</small>
-                    <h4 class="text-danger mb-0">
-                        R$ @ViewBag.TotalDespesas.ToString("N2")
-                    </h4>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <small class="text-muted">Saldo</small>
-                    <h4 class="@(saldo >= 0 ? "text-success" : "text-danger") mb-0">
-                        R$ @saldo.ToString("N2")
-                    </h4>
-                </div>
+                <p class="small text-muted mb-0">Entradas do mês</p>
             </div>
         </div>
     </div>
 
-    <!-- Ações rápidas -->
-    <h5 class="mb-3">Ações rápidas</h5>
+    <div class="col-md-4">
+        <div class="card card-accent-red">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <small class="text-muted">DESPESAS</small>
+                        <h4 class="text-danger mb-0">
+                            R$ @ViewBag.TotalDespesas.ToString("N2")
+                        </h4>
+                    </div>
+                    <i class="bi bi-arrow-down-circle" style="color: var(--accent-red); font-size: 2rem;"></i>
+                </div>
+                <p class="small text-muted mb-0">Saídas do mês</p>
+            </div>
+        </div>
+    </div>
 
-    <div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card card-accent-blue">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <small class="text-muted">SALDO</small>
+                        <h4 class="@(saldo >= 0 ? "text-success" : "text-danger") mb-0">
+                            R$ @saldo.ToString("N2")
+                        </h4>
+                    </div>
+                    <i class="bi bi-wallet" style="@(saldo >= 0 ? "color: var(--accent-green);" : "color: var(--accent-red);") font-size: 2rem;"></i>
+                </div>
+                <p class="small text-muted mb-0">Diferença do período</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ações rápidas -->
+<div class="mb-5">
+    <h5 class="mb-4" style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;">Ações Rápidas</h5>
+
+    <div class="row g-4">
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card card-accent-green text-center">
                 <div class="card-body">
-                    <h6 class="mb-2">Nova Receita</h6>
-                    <p class="text-muted small">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent-green);">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Nova Receita</h6>
+                    <p class="text-muted small mb-3">
                         Registrar uma entrada financeira
                     </p>
-                    <a class="btn btn-success btn-sm w-100" href="/receitas/novo">
-                        Adicionar receita
+                    <a class="btn btn-success w-100" href="/receitas/novo">
+                        <i class="bi bi-plus"></i> Adicionar
                     </a>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card card-accent-red text-center">
                 <div class="card-body">
-                    <h6 class="mb-2">Nova Despesa</h6>
-                    <p class="text-muted small">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent-red);">
+                        <i class="bi bi-dash-circle-fill"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Nova Despesa</h6>
+                    <p class="text-muted small mb-3">
                         Registrar um gasto
                     </p>
-                    <a href="/despesas/novo" class="btn btn-danger btn-sm w-100">
-                        Adicionar despesa
+                    <a href="/despesas/novo" class="btn btn-danger w-100">
+                        <i class="bi bi-plus"></i> Adicionar
                     </a>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card card-accent-blue text-center">
                 <div class="card-body">
-                    <h6 class="mb-2">Categorias</h6>
-                    <p class="text-muted small">
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent-blue);">
+                        <i class="bi bi-tag-fill"></i>
+                    </div>
+                    <h6 class="fw-bold mb-2">Categorias</h6>
+                    <p class="text-muted small mb-3">
                         Gerenciar categorias financeiras
                     </p>
-                    <a href="/categorias" class="btn btn-outline-dark btn-sm w-100">
-                        Ver categorias
+                    <a href="/categorias" class="btn btn-outline-dark w-100">
+                        <i class="bi bi-arrow-right"></i> Ver
                     </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Últimas despesas -->
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Últimas despesas</h5>
-        <a href="/despesas" class="text-decoration-none small">
-            Ver todas →
+<!-- Últimas despesas -->
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0;">Últimas Despesas</h5>
+        <a href="/despesas" class="text-decoration-none" style="color: var(--accent-blue); font-weight: 600;">
+            Ver todas <i class="bi bi-arrow-right"></i>
         </a>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card">
         <div class="card-body p-0">
-            <table class="table table-sm table-hover mb-0">
+            <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Data</th>
@@ -120,8 +147,9 @@
                     @if (ViewBag.Ultimas.Count == 0)
                     {
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-3">
-                                Nenhuma despesa registrada neste mês
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
+                                <p class="mt-2 mb-0">Nenhuma despesa registrada neste mês</p>
                             </td>
                         </tr>
                     }
@@ -132,7 +160,7 @@
                             <tr>
                                 <td>@item.Data.ToString("dd/MM/yyyy")</td>
                                 <td>@item.Categoria?.Nome</td>
-                                <td class="text-danger text-end">
+                                <td class="text-danger text-end fw-bold">
                                     R$ @item.Valor.ToString("N2")
                                 </td>
                             </tr>
@@ -142,5 +170,10 @@
             </table>
         </div>
     </div>
-
 </div>
+
+<style>
+    .hero {
+        padding: 4rem 0;
+    }
+</style>

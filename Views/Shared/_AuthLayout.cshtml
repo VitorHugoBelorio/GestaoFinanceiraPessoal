@@ -14,10 +14,19 @@
 
     <!-- App styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <main class="container">
+    <main class="w-100">
         @RenderBody()
     </main>
 

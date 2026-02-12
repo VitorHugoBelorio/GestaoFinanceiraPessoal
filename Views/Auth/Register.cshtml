@@ -3,50 +3,72 @@
     ViewData["Title"] = "Cadastre-se";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <div class="card shadow-sm mt-5">
-            <div class="card-body">
-                <h4 class="text-center mb-4">Criar conta</h4>
+<div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100">
+        <div class="col-md-5 col-lg-4">
+            <!-- Logo -->
+            <div class="text-center mb-4">
+                <h2 class="fw-900" style="font-size: 2.5rem; letter-spacing: -1px;">
+                    <i class="bi bi-cash-coin"></i> GFP
+                </h2>
+                <p class="text-muted" style="font-size: 0.9rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                    Gestão Financeira Pessoal
+                </p>
+            </div>
 
-                @if (ViewBag.Error != null)
-                {
-                    <div class="alert alert-danger">
-                        @ViewBag.Error
-                    </div>
-                }
-                <form method="post">
-                    <div class="mb-3">
-                        <label class="form-label">Nome de usuário</label>
-                        <input name="username" class="form-control" required />
-                    </div>
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4" style="letter-spacing: 0.5px;">Criar nova conta</h5>
 
-                    <div class="mb-3">
-                        <label class="form-label">E-mail</label>
-                        <input type="email" name="email" class="form-control" required />
-                    </div>
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            @ViewBag.Error
+                        </div>
+                    }
 
-                    <div class="mb-3">
-                        <label class="form-label">Senha</label>
-                        <input type="password" name="password" class="form-control" required />
-                    </div>
+                    <form method="post">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Nome de usuário</label>
+                            <input type="text" name="username" class="form-control" placeholder="seu_usuario" required />
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Confirmar senha</label>
-                        <input type="password" name="confirmPassword" class="form-control" required />
-                    </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">E-mail</label>
+                            <input type="email" name="email" class="form-control" placeholder="seu@email.com" required />
+                        </div>
 
-                    <button class="btn btn-dark w-100">
-                        Cadastrar
-                    </button>
-                </form>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Senha</label>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+                        </div>
 
-                <div class="text-center mt-3">
-                    <a href="/auth/login" class="text-decoration-none">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Confirmar senha</label>
+                            <input type="password" name="confirmPassword" class="form-control" placeholder="••••••••" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold mb-3" style="padding: 0.75rem;">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Cadastrar
+                        </button>
+                    </form>
+
+                    <!-- Link para login -->
+                    <div class="text-center" style="font-size: 0.875rem;">
                         Já tenho uma conta
-                    </a>
+                        <a href="/auth/login" class="text-decoration-none fw-bold" style="color: var(--accent-blue);">
+                            Fazer login
+                        </a>
+                    </div>
                 </div>
             </div>
+
+            <!-- Footer -->
+            <p class="text-center text-muted mt-4" style="font-size: 0.8rem; letter-spacing: 0.3px;">
+                © 2026 Gestão Financeira Pessoal
+            </p>
         </div>
     </div>
 </div>

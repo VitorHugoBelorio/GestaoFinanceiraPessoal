@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"] - Gestão Financeira</title>
+    <title>@ViewData["Title"] - Gestão Financeira Pessoal</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -18,12 +18,14 @@
     <!-- App styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
+<body>
 
     @await Html.PartialAsync("_Navbar")
 
-    <main class="container py-4">
-        @RenderBody()
+    <main>
+        <div class="container">
+            @RenderBody()
+        </div>
     </main>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

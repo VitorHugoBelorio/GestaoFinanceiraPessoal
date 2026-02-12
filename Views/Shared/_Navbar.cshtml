@@ -1,19 +1,20 @@
 ﻿@{ var currentController = ViewContext.RouteData.Values["controller"]?.ToString().ToLower(); }
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg">
     <div class="container">
         <!-- Logo / Nome do sistema -->
-        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">Gestão Financeira</a>
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-cash-coin"></i> GFP
+        </a>
 
         <!-- Botão mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarContent">
-            <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
         </button>
 
         <!-- Conteúdo -->
         <div class="collapse navbar-collapse" id="navbarContent">
-            <!-- Menu à esquerda -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2">
+            <!-- Menu no centro -->
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link @(currentController == "home" ? "active" : "")" asp-controller="Home" asp-action="Index">Dashboard</a>
                 </li>
@@ -32,17 +33,17 @@
             </ul>
 
             <!-- Área do usuário (direita) -->
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-center">
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center"
                            href="#"
                            role="button"
                            data-bs-toggle="dropdown"
                            aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
-                            @User.Identity.Name
+                            <i class="bi bi-person-circle me-2"></i>
+                            <span>@User.Identity.Name</span>
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -58,7 +59,9 @@
                 else
                 {
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Auth" asp-action="Login">Entrar</a>
+                        <a class="btn btn-primary" asp-controller="Auth" asp-action="Login">
+                            <i class="bi bi-box-arrow-in-right"></i> Entrar
+                        </a>
                     </li>
                 }
             </ul>
