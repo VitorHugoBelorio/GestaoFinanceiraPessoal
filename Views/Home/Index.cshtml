@@ -1,6 +1,13 @@
-﻿@{
+﻿@model DashboardViewModel
+@using System.Globalization
+
+@{
     ViewData["Title"] = "Dashboard";
-    decimal saldo = ViewBag.Saldo;
+    var saldo = Model.Saldo;
+    var periodoAtual = new DateTime(Model.Ano, Model.Mes, 1);
+    var mesAnterior = periodoAtual.AddMonths(-1);
+    var proximoMes = periodoAtual.AddMonths(1);
+    var cultura = new CultureInfo("pt-BR");
 }
 
 <!-- Hero Section -->
@@ -8,7 +15,18 @@
     <div class="mb-5">
         <small class="text-muted">Bem-vindo de volta</small>
         <h1>Seu Panorama Financeiro</h1>
-        <p class="text-muted">@ViewBag.Mes/@ViewBag.Ano</p>
+        <p class="text-muted">@periodoAtual.ToString("MMMM 'de' yyyy", cultura)</p>
+        <div class="d-flex gap-3 flex-wrap mt-3">
+            <a asp-controller="Home" asp-action="Index" asp-route-ano="@mesAnterior.Year" asp-route-mes="@mesAnterior.Month" class="btn btn-outline-dark btn-sm">
+                <i class="bi bi-arrow-left"></i> @mesAnterior.ToString("MMM", cultura)
+            </a>
+            <a asp-controller="Home" asp-action="Index" asp-route-ano="@DateTime.Today.Year" asp-route-mes="@DateTime.Today.Month" class="btn btn-outline-primary btn-sm">
+                Hoje
+            </a>
+            <a asp-controller="Home" asp-action="Index" asp-route-ano="@proximoMes.Year" asp-route-mes="@proximoMes.Month" class="btn btn-outline-dark btn-sm">
+                @proximoMes.ToString("MMM", cultura) <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
     </div>
 </div>
 
@@ -21,7 +39,7 @@
                     <div>
                         <small class="text-muted">RECEITAS</small>
                         <h4 class="text-success mb-0">
-                            R$ @ViewBag.TotalReceitas.ToString("N2")
+                            R$ @Model.TotalReceitas.ToString("N2")
                         </h4>
                     </div>
                     <i class="bi bi-arrow-up-circle" style="color: var(--accent-green); font-size: 2rem;"></i>
@@ -38,7 +56,7 @@
                     <div>
                         <small class="text-muted">DESPESAS</small>
                         <h4 class="text-danger mb-0">
-                            R$ @ViewBag.TotalDespesas.ToString("N2")
+                            R$ @Model.TotalDespesas.ToString("N2")
                         </h4>
                     </div>
                     <i class="bi bi-arrow-down-circle" style="color: var(--accent-red); font-size: 2rem;"></i>
@@ -115,7 +133,7 @@
                     <p class="text-muted small mb-3">
                         Gerenciar categorias financeiras
                     </p>
-                    <a href="/categorias" class="btn btn-outline-dark w-100">
+                    <a asp-controller="Categoria" asp-action="Index" class="btn btn-outline-dark w-100">
                         <i class="bi bi-arrow-right"></i> Ver
                     </a>
                 </div>
@@ -144,7 +162,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.Ultimas.Count == 0)
+                    @if (!Model.UltimasDespesas.Any())
                     {
                         <tr>
                             <td colspan="3" class="text-center text-muted py-4">
@@ -155,11 +173,19 @@
                     }
                     else
                     {
-                        @foreach (var item in ViewBag.Ultimas)
+                        @foreach (var item in Model.UltimasDespesas)
                         {
                             <tr>
                                 <td>@item.Data.ToString("dd/MM/yyyy")</td>
-                                <td>@item.Categoria?.Nome</td>
+                                <td>
+                                    @item.CategoriaNome
+                                    @if (item.Recorrente)
+                                    {
+                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">
+                                            FIXA
+                                        </span>
+                                    }
+                                </td>
                                 <td class="text-danger text-end fw-bold">
                                     R$ @item.Valor.ToString("N2")
                                 </td>
