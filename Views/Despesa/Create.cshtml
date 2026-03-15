@@ -1,0 +1,69 @@
+@model GestaoFinanceiraPessoal.Models.Despesa
+
+@{
+    ViewData["Title"] = "Nova Despesa";
+}
+
+<div class="py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 style="font-weight: 900; font-size: 2.25rem;">Nova Despesa</h1>
+            <p class="text-muted mb-0">Registre um novo gasto para o mês atual.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-controller="Despesa" asp-action="Create">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Descricao" class="form-label">Descrição</label>
+                    <input asp-for="Descricao" class="form-control" />
+                    <span asp-validation-for="Descricao" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Valor" class="form-label">Valor</label>
+                    <input asp-for="Valor" class="form-control js-currency" />
+                    <span asp-validation-for="Valor" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Data" class="form-label">Data</label>
+                    <input asp-for="Data" type="date" class="form-control" />
+                    <span asp-validation-for="Data" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoriaId" class="form-label">Categoria</label>
+                    <select asp-for="CategoriaId" class="form-select">
+                        <option value="">Selecione uma categoria</option>
+                        @foreach (var categoria in ViewBag.Categorias)
+                        {
+                            <option value="@categoria.Id">@categoria.Nome</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CategoriaId" class="text-danger small"></span>
+                </div>
+
+                @if (((IEnumerable<Categoria>)ViewBag.Categorias).Any() == false)
+                {
+                    <div class="alert alert-warning mb-3">
+                        Você ainda não possui categorias cadastradas.
+                        <a asp-controller="Categoria" asp-action="Create" class="fw-bold text-decoration-none">Criar categoria</a>
+                    </div>
+                }
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" name="recorrente" id="recorrente" />
+                    <label class="form-check-label" for="recorrente">Despesa fixa (recorrente)</label>
+                </div>
+
+                <button type="submit" class="btn btn-danger">Salvar</button>
+                <a asp-controller="Despesa" asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>

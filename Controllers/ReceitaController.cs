@@ -1,5 +1,6 @@
-﻿using GestaoFinanceiraPessoal.Data;
+using GestaoFinanceiraPessoal.Data;
 using GestaoFinanceiraPessoal.Models;
+using GestaoFinanceiraPessoal.Models.ViewModels;
 using GestaoFinanceiraPessoal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,31 +32,47 @@ namespace GestaoFinanceiraPessoal.Controllers
             if (mes == 0) mes = DateTime.Now.Month;
             if (ano == 0) ano = DateTime.Now.Year;
 
-            var dataReferencia = new DateTime(ano, mes, 1);
+            var inicioMes = new DateTime(ano, mes, 1);
+            var fimMes = inicioMes.AddMonths(1).AddDays(-1);
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var receitas = await _context.Receitas
                 .Include(r => r.Recorrencia)
                 .Where(r => r.UserId == userId && (
-                    // Variáveis
                     (r.RecorrenciaId == null &&
-                     r.Data.Month == mes &&
-                     r.Data.Year == ano)
-
+                     r.Data >= inicioMes &&
+                     r.Data <= fimMes)
                     ||
-
-                    // Fixas
                     (r.RecorrenciaId != null &&
-                     r.Recorrencia.ProximaExecucao <= dataReferencia &&
-                     (r.Recorrencia.DataFim == null || r.Recorrencia.DataFim >= dataReferencia))
+                     r.Data <= fimMes &&
+                     (r.Recorrencia == null || r.Recorrencia.DataFim == null || r.Recorrencia.DataFim >= inicioMes))
                 ))
+                .OrderBy(r => r.Data)
                 .ToListAsync();
 
-            ViewBag.Mes = mes;
-            ViewBag.Ano = ano;
+            var model = new ReceitaIndexViewModel
+            {
+                Ano = ano,
+                Mes = mes,
+                Total = receitas.Sum(r => r.Valor),
+                Itens = receitas
+                    .Select(r => new ReceitaListaItemViewModel
+                    {
+                        Id = r.Id,
+                        Descricao = r.Descricao,
+                        Valor = r.Valor,
+                        DataExibicao = r.RecorrenciaId != null
+                            ? CriarDataReferenciaNoMes(r.Data, ano, mes)
+                            : r.Data,
+                        Recorrente = r.RecorrenciaId != null
+                    })
+                    .OrderBy(r => r.DataExibicao)
+                    .ThenBy(r => r.Descricao)
+                    .ToList()
+            };
 
-            return View(receitas);
+            return View(model);
         }
 
         // FORM CREATE
@@ -99,7 +116,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         }
 
         // EDIT (POST)
-        [HttpPost("editar/{id:int}")] // Usado por limitação do HTML que apenas aceita os verbos GET e POST, por se tratar de um projeto simples acho melhor deixar assim.
+        [HttpPost("editar/{id:int}")] // Usado por limita��o do HTML que apenas aceita os verbos GET e POST, por se tratar de um projeto simples acho melhor deixar assim.
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Receita model, bool recorrente)
         {
@@ -157,6 +174,12 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private static DateTime CriarDataReferenciaNoMes(DateTime dataOriginal, int ano, int mes)
+        {
+            var dia = Math.Min(dataOriginal.Day, DateTime.DaysInMonth(ano, mes));
+            return new DateTime(ano, mes, dia);
         }
     }
 }

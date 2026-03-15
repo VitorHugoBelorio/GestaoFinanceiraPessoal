@@ -1,8 +1,12 @@
-@model IEnumerable<GestaoFinanceiraPessoal.Models.Receita>
+@model ReceitaIndexViewModel
+@using System.Globalization
 
 @{
     ViewData["Title"] = "Receitas";
-    var total = Model?.Sum(m => m.Valor) ?? 0m;
+    var periodoAtual = new DateTime(Model.Ano, Model.Mes, 1);
+    var mesAnterior = periodoAtual.AddMonths(-1);
+    var proximoMes = periodoAtual.AddMonths(1);
+    var cultura = new CultureInfo("pt-BR");
 }
 
 <div class="py-5">
@@ -11,22 +15,31 @@
             <h1 style="font-weight: 900; font-size: 2.5rem;">Receitas</h1>
             <p class="text-muted mb-0">
                 Total:
-                <span class="text-success fw-bold">R$ @total.ToString("N2")</span>
+                <span class="text-success fw-bold">R$ @Model.Total.ToString("N2")</span>
             </p>
+            <div class="d-flex gap-3 flex-wrap mt-3">
+                <a asp-controller="Receita" asp-action="Index" asp-route-ano="@mesAnterior.Year" asp-route-mes="@mesAnterior.Month" class="btn btn-outline-dark btn-sm">
+                    <i class="bi bi-arrow-left"></i> @mesAnterior.ToString("MMM", cultura)
+                </a>
+                <span class="text-muted align-self-center">@periodoAtual.ToString("MMMM 'de' yyyy", cultura)</span>
+                <a asp-controller="Receita" asp-action="Index" asp-route-ano="@proximoMes.Year" asp-route-mes="@proximoMes.Month" class="btn btn-outline-dark btn-sm">
+                    @proximoMes.ToString("MMM", cultura) <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
         </div>
-        <a class="btn btn-success" href="/receitas/novo">
+        <a class="btn btn-success" asp-controller="Receita" asp-action="Create">
             <i class="bi bi-plus-circle"></i> Nova Receita
         </a>
     </div>
 
-    @if (!Model.Any())
+    @if (!Model.Itens.Any())
     {
         <div class="card text-center py-5">
             <div class="card-body">
                 <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3; color: var(--text-light);"></i>
                 <h5 class="mt-3 mb-2">Nenhuma receita registrada</h5>
                 <p class="text-muted mb-4">Comece adicionando uma nova receita</p>
-                <a class="btn btn-success" href="/receitas/novo">
+                <a class="btn btn-success" asp-controller="Receita" asp-action="Create">
                     <i class="bi bi-plus"></i> Adicionar Receita
                 </a>
             </div>
@@ -40,33 +53,33 @@
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>DescriÃ§Ã£o</th>
+                            <th>Descrição</th>
                             <th class="text-end">Valor</th>
-                            <th class="text-end">AÃ§Ã£o</th>
+                            <th class="text-end">Ação</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var r in Model)
+                        @foreach (var receita in Model.Itens)
                         {
                             <tr>
                                 <td>
-                                    <span class="fw-bold">@r.Data.ToString("dd/MM/yyyy")</span>
+                                    <span class="fw-bold">@receita.DataExibicao.ToString("dd/MM/yyyy")</span>
                                 </td>
                                 <td>
-                                    @r.Descricao
-                                    @if (r.RecorrenciaId != null)
+                                    @receita.Descricao
+                                    @if (receita.Recorrente)
                                     {
                                         <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">
                                             FIXA
                                         </span>
                                     }
                                 </td>
-                                <td class="text-success text-end fw-bold">R$ @r.Valor.ToString("N2")</td>
+                                <td class="text-success text-end fw-bold">R$ @receita.Valor.ToString("N2")</td>
                                 <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-primary me-2" href="/receitas/editar/@r.Id">
+                                    <a class="btn btn-sm btn-outline-primary me-2" asp-controller="Receita" asp-action="Edit" asp-route-id="@receita.Id">
                                         <i class="bi bi-pencil"></i> Editar
                                     </a>
-                                    <a class="btn btn-sm btn-outline-danger" href="/receitas/excluir/@r.Id" onclick="return confirm('Tem certeza que deseja excluir?')">
+                                    <a class="btn btn-sm btn-outline-danger js-delete" asp-controller="Receita" asp-action="Delete" asp-route-id="@receita.Id">
                                         <i class="bi bi-trash"></i> Excluir
                                     </a>
                                 </td>
