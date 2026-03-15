@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace GestaoFinanceiraPessoal.Controllers
 {
     [Authorize]
-    [Route("categoria")]
+    [Route("categorias")]
     public class CategoriaController : Controller
     {
         private readonly AppDbContext _context;
@@ -30,7 +30,8 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpGet("novo")]
         public IActionResult Create() => View();
 
-        [HttpPost("")]
+        [HttpPost("novo")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Categoria model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -43,7 +44,7 @@ namespace GestaoFinanceiraPessoal.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet("{id:int}/editar")]
+        [HttpGet("editar/{id:int}")]
         public async Task<IActionResult> Edit(int id)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -53,7 +54,8 @@ namespace GestaoFinanceiraPessoal.Controllers
             return categoria == null ? NotFound() : View(categoria);
         }
 
-        [HttpPost("{id:int}")]
+        [HttpPost("editar/{id:int}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Categoria model)
         {
             if (!ModelState.IsValid) return View(model);
@@ -79,9 +81,19 @@ namespace GestaoFinanceiraPessoal.Controllers
 
             if (categoria == null) return NotFound();
 
+            var possuiDespesas = await _context.Despesas
+                .AnyAsync(d => d.CategoriaId == id && d.UserId == userId);
+
+            if (possuiDespesas)
+            {
+                TempData["Error"] = "Não é possível excluir a categoria porque ela já está vinculada a despesas.";
+                return RedirectToAction(nameof(Index));
+            }
+
             _context.Categorias.Remove(categoria);
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Categoria excluída com sucesso.";
             return RedirectToAction(nameof(Index));
         }
     }

@@ -1,0 +1,72 @@
+@model IEnumerable<GestaoFinanceiraPessoal.Models.Categoria>
+
+@{
+    ViewData["Title"] = "Categorias";
+}
+
+<div class="py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 style="font-weight: 900; font-size: 2.5rem;">Categorias</h1>
+            <p class="text-muted mb-0">Organize suas despesas por grupos.</p>
+        </div>
+        <a class="btn btn-outline-dark" asp-controller="Categoria" asp-action="Create">
+            <i class="bi bi-plus-circle"></i> Nova Categoria
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-tags" style="font-size: 3rem; opacity: 0.3; color: var(--text-light);"></i>
+                <h5 class="mt-3 mb-2">Nenhuma categoria cadastrada</h5>
+                <p class="text-muted mb-4">Crie categorias para classificar melhor suas despesas.</p>
+                <a class="btn btn-outline-dark" asp-controller="Categoria" asp-action="Create">
+                    <i class="bi bi-plus"></i> Criar Categoria
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var categoria in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">@categoria.Nome</td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-primary me-2" asp-controller="Categoria" asp-action="Edit" asp-route-id="@categoria.Id">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-danger js-delete" asp-controller="Categoria" asp-action="Delete" asp-route-id="@categoria.Id">
+                                        <i class="bi bi-trash"></i> Excluir
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
