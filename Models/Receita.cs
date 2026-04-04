@@ -6,22 +6,27 @@ namespace GestaoFinanceiraPessoal.Models
     {
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Descrição é obrigatória")]
-        public string Descricao { get; set; }
+        [Required(ErrorMessage = "Descricao e obrigatoria")]
+        public string Descricao { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Currency)]
         public decimal Valor { get; set; }
 
-        [Required(ErrorMessage = "Data é obrigatória")]
+        [Required(ErrorMessage = "Data e obrigatoria")]
         [DataType(DataType.Date)]
         public DateTime Data { get; set; }
+
+        public bool EhModeloRecorrente { get; set; }
+
+        [DataType(DataType.Date)]
+        public DateTime? DataReferenciaRecorrencia { get; set; }
+
+        public bool OcorrenciaCancelada { get; set; }
 
         public int? RecorrenciaId { get; set; }
         public Recorrencia? Recorrencia { get; set; }
 
-        // Foreign key to identify owner (User)
         public int UserId { get; set; }
     }
-
 }

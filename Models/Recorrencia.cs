@@ -1,16 +1,19 @@
-﻿public class Recorrencia
+﻿namespace GestaoFinanceiraPessoal.Models
 {
-    public int Id { get; set; }
+    public class Recorrencia
+    {
+        public int Id { get; set; }
 
-    // Ex: Mensal, Semanal, Anual
-    public string Tipo { get; set; } = string.Empty;
+        public string Tipo { get; set; } = string.Empty;
 
-    // A cada quantos períodos (ex: 1 mês, 2 meses)
-    public int Intervalo { get; set; } = 1;
+        public int Intervalo { get; set; } = 1;
 
-    // Data final da recorrência (opcional)
-    public DateTime? DataFim { get; set; }
+        public int DiaReferencia { get; set; }
 
-    // Controle interno
-    public DateTime ProximaExecucao { get; set; }
+        public int MesReferencia { get; set; }
+
+        public DateTime? DataFim { get; set; }
+
+        public DateTime ProximaExecucao { get; set; }
+    }
 }
