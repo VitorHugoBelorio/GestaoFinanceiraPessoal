@@ -1,4 +1,4 @@
-@model DespesaIndexViewModel
+ï»¿@model DespesaIndexViewModel
 @using System.Globalization
 
 @{
@@ -27,9 +27,15 @@
                 </a>
             </div>
         </div>
-        <a class="btn btn-danger" asp-controller="Despesa" asp-action="Create">
-            <i class="bi bi-plus-circle"></i> Nova Despesa
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-secondary" asp-controller="Despesa" asp-action="Index" asp-route-ano="@Model.Ano" asp-route-mes="@Model.Mes" asp-route-exibirCanceladas="@(Model.ExibirCanceladas ? "false" : "true")">
+                <i class="bi @(Model.ExibirCanceladas ? "bi-eye-slash" : "bi-eye")"></i>
+                @(Model.ExibirCanceladas ? "Ocultar canceladas" : "Mostrar canceladas")
+            </a>
+            <a class="btn btn-danger" asp-controller="Despesa" asp-action="Create">
+                <i class="bi bi-plus-circle"></i> Nova Despesa
+            </a>
+        </div>
     </div>
 
     @if (!Model.Itens.Any())
@@ -53,26 +59,30 @@
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Descrição</th>
+                            <th>Descricao</th>
                             <th>Categoria</th>
+                            <th>Status</th>
                             <th class="text-end">Valor</th>
-                            <th class="text-end">Ação</th>
+                            <th class="text-end">Acao</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var despesa in Model.Itens)
                         {
-                            <tr>
+                            var corStatus = despesa.Status == StatusDespesa.Pago ? "var(--accent-green)" : "var(--accent-red)";
+                            var classeLinha = despesa.OcorrenciaCancelada ? "table-secondary" : string.Empty;
+                            var classeValor = despesa.OcorrenciaCancelada ? "text-muted text-end fw-bold text-decoration-line-through" : "text-danger text-end fw-bold";
+                            <tr class="@classeLinha">
+                                <td><span class="fw-bold">@despesa.DataExibicao.ToString("dd/MM/yyyy")</span></td>
                                 <td>
-                                    <span class="fw-bold">@despesa.DataExibicao.ToString("dd/MM/yyyy")</span>
-                                </td>
-                                <td>
-                                    @despesa.Descricao
+                                    <span class="@(despesa.OcorrenciaCancelada ? "text-muted text-decoration-line-through" : string.Empty)">@despesa.Descricao</span>
                                     @if (despesa.Recorrente)
                                     {
-                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">
-                                            FIXA
-                                        </span>
+                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">FIXA</span>
+                                    }
+                                    @if (despesa.OcorrenciaCancelada)
+                                    {
+                                        <span class="badge bg-secondary ms-2">CANCELADA</span>
                                     }
                                 </td>
                                 <td>
@@ -80,16 +90,37 @@
                                         @despesa.CategoriaNome
                                     </span>
                                 </td>
-                                <td class="text-danger text-end fw-bold">
-                                    R$ @despesa.Valor.ToString("N2")
+                                <td>
+                                    <span class="badge" style="background-color: @corStatus; opacity: 0.2; color: @corStatus;">
+                                        @despesa.Status
+                                    </span>
                                 </td>
+                                <td class="@classeValor">R$ @despesa.Valor.ToString("N2")</td>
                                 <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-primary me-2" asp-controller="Despesa" asp-action="Edit" asp-route-id="@despesa.Id">
-                                        <i class="bi bi-pencil"></i> Editar
-                                    </a>
-                                    <a class="btn btn-sm btn-outline-danger js-delete" asp-controller="Despesa" asp-action="Delete" asp-route-id="@despesa.Id">
-                                        <i class="bi bi-trash"></i> Excluir
-                                    </a>
+                                    @if (despesa.OcorrenciaCancelada)
+                                    {
+                                        <form method="post" asp-controller="Despesa" asp-action="Restore" asp-route-id="@despesa.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        @if (despesa.Recorrente)
+                                        {
+                                            <a class="btn btn-sm btn-outline-secondary me-2" asp-controller="Despesa" asp-action="EditSeries" asp-route-id="@despesa.Id">
+                                                <i class="bi bi-arrow-repeat"></i> Serie
+                                            </a>
+                                        }
+                                        <a class="btn btn-sm btn-outline-primary me-2" asp-controller="Despesa" asp-action="Edit" asp-route-id="@despesa.Id">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-danger js-delete" asp-controller="Despesa" asp-action="Delete" asp-route-id="@despesa.Id">
+                                            <i class="bi bi-trash"></i> Excluir
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }

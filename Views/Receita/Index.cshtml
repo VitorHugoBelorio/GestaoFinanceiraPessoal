@@ -1,4 +1,4 @@
-@model ReceitaIndexViewModel
+ï»¿@model ReceitaIndexViewModel
 @using System.Globalization
 
 @{
@@ -27,9 +27,15 @@
                 </a>
             </div>
         </div>
-        <a class="btn btn-success" asp-controller="Receita" asp-action="Create">
-            <i class="bi bi-plus-circle"></i> Nova Receita
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-outline-secondary" asp-controller="Receita" asp-action="Index" asp-route-ano="@Model.Ano" asp-route-mes="@Model.Mes" asp-route-exibirCanceladas="@(Model.ExibirCanceladas ? "false" : "true")">
+                <i class="bi @(Model.ExibirCanceladas ? "bi-eye-slash" : "bi-eye")"></i>
+                @(Model.ExibirCanceladas ? "Ocultar canceladas" : "Mostrar canceladas")
+            </a>
+            <a class="btn btn-success" asp-controller="Receita" asp-action="Create">
+                <i class="bi bi-plus-circle"></i> Nova Receita
+            </a>
+        </div>
     </div>
 
     @if (!Model.Itens.Any())
@@ -53,35 +59,56 @@
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Descrição</th>
+                            <th>Descricao</th>
                             <th class="text-end">Valor</th>
-                            <th class="text-end">Ação</th>
+                            <th class="text-end">Acao</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var receita in Model.Itens)
                         {
-                            <tr>
+                            var classeLinha = receita.OcorrenciaCancelada ? "table-secondary" : string.Empty;
+                            var classeValor = receita.OcorrenciaCancelada ? "text-muted text-end fw-bold text-decoration-line-through" : "text-success text-end fw-bold";
+
+                            <tr class="@classeLinha">
+                                <td><span class="fw-bold">@receita.DataExibicao.ToString("dd/MM/yyyy")</span></td>
                                 <td>
-                                    <span class="fw-bold">@receita.DataExibicao.ToString("dd/MM/yyyy")</span>
-                                </td>
-                                <td>
-                                    @receita.Descricao
+                                    <span class="@(receita.OcorrenciaCancelada ? "text-muted text-decoration-line-through" : string.Empty)">@receita.Descricao</span>
                                     @if (receita.Recorrente)
                                     {
-                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">
-                                            FIXA
-                                        </span>
+                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">FIXA</span>
+                                    }
+                                    @if (receita.OcorrenciaCancelada)
+                                    {
+                                        <span class="badge bg-secondary ms-2">CANCELADA</span>
                                     }
                                 </td>
-                                <td class="text-success text-end fw-bold">R$ @receita.Valor.ToString("N2")</td>
+                                <td class="@classeValor">R$ @receita.Valor.ToString("N2")</td>
                                 <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-primary me-2" asp-controller="Receita" asp-action="Edit" asp-route-id="@receita.Id">
-                                        <i class="bi bi-pencil"></i> Editar
-                                    </a>
-                                    <a class="btn btn-sm btn-outline-danger js-delete" asp-controller="Receita" asp-action="Delete" asp-route-id="@receita.Id">
-                                        <i class="bi bi-trash"></i> Excluir
-                                    </a>
+                                    @if (receita.OcorrenciaCancelada)
+                                    {
+                                        <form method="post" asp-controller="Receita" asp-action="Restore" asp-route-id="@receita.Id" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        @if (receita.Recorrente)
+                                        {
+                                            <a class="btn btn-sm btn-outline-secondary me-2" asp-controller="Receita" asp-action="EditSeries" asp-route-id="@receita.Id">
+                                                <i class="bi bi-arrow-repeat"></i> Serie
+                                            </a>
+                                        }
+                                        <a class="btn btn-sm btn-outline-primary me-2" asp-controller="Receita" asp-action="Edit" asp-route-id="@receita.Id">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-danger js-delete" asp-controller="Receita" asp-action="Delete" asp-route-id="@receita.Id">
+                                            <i class="bi bi-trash"></i> Excluir
+                                        </a>
+                                    }
                                 </td>
                             </tr>
                         }

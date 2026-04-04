@@ -1,38 +1,76 @@
-@model GestaoFinanceiraPessoal.Models.Receita
+﻿@model ReceitaFormViewModel
 
 @{
     ViewData["Title"] = "Nova Receita";
 }
 
-<h3 class="mb-3">Nova receita</h3>
-
-<form method="post" action="/receitas/novo">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-    <div class="mb-3">
-        <label class="form-label">Descrição</label>
-        <input asp-for="Descricao" class="form-control" />
-        <span asp-validation-for="Descricao" class="text-danger small"></span>
+<div class="py-5">
+    <div class="mb-4">
+        <h1 style="font-weight: 900; font-size: 2.25rem;">Nova Receita</h1>
+        <p class="text-muted mb-0">Registre uma nova entrada e, se quiser, transforme em serie recorrente.</p>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Valor</label>
-        <input asp-for="Valor" class="form-control js-currency" />
-        <span asp-validation-for="Valor" class="text-danger small"></span>
-    </div>
+    <div class="card">
+        <div class="card-body">
+            <form method="post" asp-controller="Receita" asp-action="Create">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-        <label class="form-label">Data</label>
-        <input asp-for="Data" type="date" class="form-control" />
-        <span asp-validation-for="Data" class="text-danger small"></span>
-    </div>
+                <div class="mb-3">
+                    <label asp-for="Descricao" class="form-label">Descricao</label>
+                    <input asp-for="Descricao" class="form-control" />
+                    <span asp-validation-for="Descricao" class="text-danger small"></span>
+                </div>
 
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" name="recorrente" id="recorrente" />
-        <label class="form-check-label" for="recorrente">Receita fixa (recorrente)</label>
-    </div>
+                <div class="mb-3">
+                    <label asp-for="Valor" class="form-label">Valor</label>
+                    <input asp-for="Valor" class="form-control js-currency" />
+                    <span asp-validation-for="Valor" class="text-danger small"></span>
+                </div>
 
-    <button type="submit" class="btn btn-success">Salvar</button>
-    <a asp-controller="Receita" asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-</form>
+                <div class="mb-4">
+                    <label asp-for="Data" class="form-label">Data</label>
+                    <input asp-for="Data" type="date" class="form-control" />
+                    <span asp-validation-for="Data" class="text-danger small"></span>
+                </div>
+
+                <div class="card border-0" style="background-color: #f8fafc;">
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input asp-for="Recorrente" class="form-check-input" />
+                            <label asp-for="Recorrente" class="form-check-label">Receita fixa (gera competencias mensais)</label>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="RecorrenciaTipo" class="form-label">Tipo</label>
+                                <select asp-for="RecorrenciaTipo" class="form-select">
+                                    @foreach (var tipo in RecorrenciaTipos.Todos)
+                                    {
+                                        <option value="@tipo">@tipo</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="RecorrenciaIntervalo" class="form-label">Intervalo</label>
+                                <input asp-for="RecorrenciaIntervalo" type="number" min="1" class="form-control" />
+                                <span asp-validation-for="RecorrenciaIntervalo" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="RecorrenciaDataFim" class="form-label">Data final</label>
+                                <input asp-for="RecorrenciaDataFim" type="date" class="form-control" />
+                                <span asp-validation-for="RecorrenciaDataFim" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-0 mt-3">As configuracoes acima so sao usadas quando a receita for marcada como recorrente.</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <a asp-controller="Receita" asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
