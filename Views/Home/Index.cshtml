@@ -10,7 +10,6 @@
     var cultura = new CultureInfo("pt-BR");
 }
 
-<!-- Hero Section -->
 <div class="hero">
     <div class="mb-5">
         <small class="text-muted">Bem-vindo de volta</small>
@@ -30,7 +29,6 @@
     </div>
 </div>
 
-<!-- Cards principais -->
 <div class="row g-4 mb-5">
     <div class="col-md-4">
         <div class="card card-accent-green">
@@ -38,13 +36,11 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <small class="text-muted">RECEITAS</small>
-                        <h4 class="text-success mb-0">
-                            R$ @Model.TotalReceitas.ToString("N2")
-                        </h4>
+                        <h4 class="text-success mb-0">R$ @Model.TotalReceitas.ToString("N2")</h4>
                     </div>
                     <i class="bi bi-arrow-up-circle" style="color: var(--accent-green); font-size: 2rem;"></i>
                 </div>
-                <p class="small text-muted mb-0">Entradas do mês</p>
+                <p class="small text-muted mb-0">Entradas do mes</p>
             </div>
         </div>
     </div>
@@ -55,13 +51,11 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <small class="text-muted">DESPESAS</small>
-                        <h4 class="text-danger mb-0">
-                            R$ @Model.TotalDespesas.ToString("N2")
-                        </h4>
+                        <h4 class="text-danger mb-0">R$ @Model.TotalDespesas.ToString("N2")</h4>
                     </div>
                     <i class="bi bi-arrow-down-circle" style="color: var(--accent-red); font-size: 2rem;"></i>
                 </div>
-                <p class="small text-muted mb-0">Saídas do mês</p>
+                <p class="small text-muted mb-0">Saidas do mes</p>
             </div>
         </div>
     </div>
@@ -72,21 +66,18 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
                         <small class="text-muted">SALDO</small>
-                        <h4 class="@(saldo >= 0 ? "text-success" : "text-danger") mb-0">
-                            R$ @saldo.ToString("N2")
-                        </h4>
+                        <h4 class="@(saldo >= 0 ? "text-success" : "text-danger") mb-0">R$ @saldo.ToString("N2")</h4>
                     </div>
                     <i class="bi bi-wallet" style="@(saldo >= 0 ? "color: var(--accent-green);" : "color: var(--accent-red);") font-size: 2rem;"></i>
                 </div>
-                <p class="small text-muted mb-0">Diferença do período</p>
+                <p class="small text-muted mb-0">Diferenca do periodo</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Ações rápidas -->
 <div class="mb-5">
-    <h5 class="mb-4" style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;">Ações Rápidas</h5>
+    <h5 class="mb-4" style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px;">Acoes Rapidas</h5>
 
     <div class="row g-4">
         <div class="col-md-4">
@@ -96,9 +87,7 @@
                         <i class="bi bi-plus-circle-fill"></i>
                     </div>
                     <h6 class="fw-bold mb-2">Nova Receita</h6>
-                    <p class="text-muted small mb-3">
-                        Registrar uma entrada financeira
-                    </p>
+                    <p class="text-muted small mb-3">Registrar uma entrada financeira</p>
                     <a class="btn btn-success w-100" href="/receitas/novo">
                         <i class="bi bi-plus"></i> Adicionar
                     </a>
@@ -113,9 +102,7 @@
                         <i class="bi bi-dash-circle-fill"></i>
                     </div>
                     <h6 class="fw-bold mb-2">Nova Despesa</h6>
-                    <p class="text-muted small mb-3">
-                        Registrar um gasto
-                    </p>
+                    <p class="text-muted small mb-3">Registrar um gasto</p>
                     <a href="/despesas/novo" class="btn btn-danger w-100">
                         <i class="bi bi-plus"></i> Adicionar
                     </a>
@@ -130,9 +117,7 @@
                         <i class="bi bi-tag-fill"></i>
                     </div>
                     <h6 class="fw-bold mb-2">Categorias</h6>
-                    <p class="text-muted small mb-3">
-                        Gerenciar categorias financeiras
-                    </p>
+                    <p class="text-muted small mb-3">Gerenciar categorias financeiras</p>
                     <a asp-controller="Categoria" asp-action="Index" class="btn btn-outline-dark w-100">
                         <i class="bi bi-arrow-right"></i> Ver
                     </a>
@@ -142,10 +127,9 @@
     </div>
 </div>
 
-<!-- Últimas despesas -->
 <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0;">Últimas Despesas</h5>
+        <h5 style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0;">Ultimas Despesas</h5>
         <a href="/despesas" class="text-decoration-none" style="color: var(--accent-blue); font-weight: 600;">
             Ver todas <i class="bi bi-arrow-right"></i>
         </a>
@@ -157,7 +141,9 @@
                 <thead class="table-light">
                     <tr>
                         <th>Data</th>
+                        <th>Descricao</th>
                         <th>Categoria</th>
+                        <th>Status</th>
                         <th class="text-end">Valor</th>
                     </tr>
                 </thead>
@@ -165,9 +151,9 @@
                     @if (!Model.UltimasDespesas.Any())
                     {
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
+                            <td colspan="5" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
-                                <p class="mt-2 mb-0">Nenhuma despesa registrada neste mês</p>
+                                <p class="mt-2 mb-0">Nenhuma despesa registrada neste mes</p>
                             </td>
                         </tr>
                     }
@@ -175,20 +161,21 @@
                     {
                         @foreach (var item in Model.UltimasDespesas)
                         {
+                            var corStatus = item.Status == StatusDespesa.Pago ? "var(--accent-green)" : "var(--accent-red)";
                             <tr>
                                 <td>@item.Data.ToString("dd/MM/yyyy")</td>
                                 <td>
-                                    @item.CategoriaNome
+                                    @item.Descricao
                                     @if (item.Recorrente)
                                     {
-                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">
-                                            FIXA
-                                        </span>
+                                        <span class="badge" style="background-color: var(--accent-blue); opacity: 0.2; color: var(--accent-blue); margin-left: 0.5rem;">FIXA</span>
                                     }
                                 </td>
-                                <td class="text-danger text-end fw-bold">
-                                    R$ @item.Valor.ToString("N2")
+                                <td>@item.CategoriaNome</td>
+                                <td>
+                                    <span class="badge" style="background-color: @corStatus; opacity: 0.2; color: @corStatus;">@item.Status</span>
                                 </td>
+                                <td class="text-danger text-end fw-bold">R$ @item.Valor.ToString("N2")</td>
                             </tr>
                         }
                     }

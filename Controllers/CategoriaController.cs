@@ -1,9 +1,9 @@
 ﻿using GestaoFinanceiraPessoal.Data;
+using GestaoFinanceiraPessoal.Extensions;
 using GestaoFinanceiraPessoal.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
@@ -21,7 +21,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userId = User.GetRequiredUserId();
             return View(await _context.Categorias
                 .Where(c => c.UserId == userId)
                 .ToListAsync());
@@ -35,7 +35,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         public async Task<IActionResult> Create(Categoria model)
         {
             if (!ModelState.IsValid) return View(model);
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userId = User.GetRequiredUserId();
             model.UserId = userId;
 
             _context.Categorias.Add(model);
@@ -47,7 +47,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpGet("editar/{id:int}")]
         public async Task<IActionResult> Edit(int id)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userId = User.GetRequiredUserId();
             var categoria = await _context.Categorias
                 .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
 
@@ -60,7 +60,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userId = User.GetRequiredUserId();
             var existing = await _context.Categorias
                 .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
 
@@ -75,7 +75,7 @@ namespace GestaoFinanceiraPessoal.Controllers
         [HttpGet("{id:int}/excluir")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userId = User.GetRequiredUserId();
             var categoria = await _context.Categorias
                 .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
 
@@ -98,3 +98,4 @@ namespace GestaoFinanceiraPessoal.Controllers
         }
     }
 }
+

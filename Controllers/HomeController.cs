@@ -1,23 +1,25 @@
-using GestaoFinanceiraPessoal.Data;
+﻿using GestaoFinanceiraPessoal.Data;
+using GestaoFinanceiraPessoal.Extensions;
 using GestaoFinanceiraPessoal.Models.ViewModels;
+using GestaoFinanceiraPessoal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace GestaoFinanceiraPessoal.Controllers
 {
-
     [Authorize]
     [Route("")]
     [Route("dashboard")]
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly RecorrenciaService _recorrenciaService;
 
-        public HomeController(AppDbContext context)
+        public HomeController(AppDbContext context, RecorrenciaService recorrenciaService)
         {
             _context = context;
+            _recorrenciaService = recorrenciaService;
         }
 
         [HttpGet("")]
@@ -27,31 +29,28 @@ namespace GestaoFinanceiraPessoal.Controllers
             var mesAtual = mes ?? DateTime.Now.Month;
             var inicioMes = new DateTime(anoAtual, mesAtual, 1);
             var fimMes = inicioMes.AddMonths(1).AddDays(-1);
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userId = User.GetRequiredUserId();
+
+            await _recorrenciaService.MaterializarCompetenciasAteAsync(userId, anoAtual, mesAtual);
 
             var receitasMes = await _context.Receitas
-                .Where(r => r.UserId == userId && (
-                    (r.RecorrenciaId == null &&
-                     r.Data >= inicioMes &&
-                     r.Data <= fimMes)
-                    ||
-                    (r.RecorrenciaId != null &&
-                     r.Data <= fimMes &&
-                     (r.Recorrencia == null || r.Recorrencia.DataFim == null || r.Recorrencia.DataFim >= inicioMes))
-                ))
+                .Where(r => r.UserId == userId
+                    && !r.EhModeloRecorrente
+                    && !r.OcorrenciaCancelada
+                    && r.Data >= inicioMes
+                    && r.Data <= fimMes)
                 .SumAsync(r => (decimal?)r.Valor) ?? 0;
 
             var despesasDoMes = await _context.Despesas
-                .Where(d => d.UserId == userId && (
-                    (d.RecorrenciaId == null &&
-                     d.Data >= inicioMes &&
-                     d.Data <= fimMes)
-                    ||
-                    (d.RecorrenciaId != null &&
-                     d.Data <= fimMes &&
-                     (d.Recorrencia == null || d.Recorrencia.DataFim == null || d.Recorrencia.DataFim >= inicioMes))
-                ))
+                .Where(d => d.UserId == userId
+                    && !d.EhModeloRecorrente
+                    && !d.OcorrenciaCancelada
+                    && d.Data >= inicioMes
+                    && d.Data <= fimMes)
                 .Include(d => d.Categoria)
+                .OrderByDescending(d => d.Data)
+                .ThenBy(d => d.Descricao)
+                .Take(5)
                 .ToListAsync();
 
             var model = new DashboardViewModel
@@ -59,31 +58,27 @@ namespace GestaoFinanceiraPessoal.Controllers
                 Ano = anoAtual,
                 Mes = mesAtual,
                 TotalReceitas = receitasMes,
-                TotalDespesas = despesasDoMes.Sum(d => d.Valor),
+                TotalDespesas = await _context.Despesas
+                    .Where(d => d.UserId == userId
+                        && !d.EhModeloRecorrente
+                        && !d.OcorrenciaCancelada
+                        && d.Data >= inicioMes
+                        && d.Data <= fimMes)
+                    .SumAsync(d => (decimal?)d.Valor) ?? 0,
                 UltimasDespesas = despesasDoMes
                     .Select(d => new DashboardDespesaViewModel
                     {
-                        Data = d.RecorrenciaId != null
-                            ? CriarDataReferenciaNoMes(d.Data, anoAtual, mesAtual)
-                            : d.Data,
+                        Data = d.Data,
                         Descricao = d.Descricao,
                         CategoriaNome = d.Categoria?.Nome ?? "Sem categoria",
+                        Status = d.Status,
                         Valor = d.Valor,
                         Recorrente = d.RecorrenciaId != null
                     })
-                    .OrderByDescending(d => d.Data)
-                    .ThenBy(d => d.Descricao)
-                    .Take(5)
                     .ToList()
             };
 
             return View(model);
-        }
-
-        private static DateTime CriarDataReferenciaNoMes(DateTime dataOriginal, int ano, int mes)
-        {
-            var dia = Math.Min(dataOriginal.Day, DateTime.DaysInMonth(ano, mes));
-            return new DateTime(ano, mes, dia);
         }
     }
 }

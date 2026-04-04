@@ -1,4 +1,4 @@
-namespace GestaoFinanceiraPessoal.Models.ViewModels
+﻿namespace GestaoFinanceiraPessoal.Models.ViewModels
 {
     public class DashboardViewModel
     {
@@ -15,6 +15,7 @@ namespace GestaoFinanceiraPessoal.Models.ViewModels
         public DateTime Data { get; set; }
         public string Descricao { get; set; } = string.Empty;
         public string CategoriaNome { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
         public decimal Valor { get; set; }
         public bool Recorrente { get; set; }
     }
