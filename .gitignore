@@ -3,8 +3,27 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
+# Local environment files (keep examples in the repository)
 .env
+.env.*
+!.env.example
+!.env.*.example
+
+# JavaScript dependencies and generated output
+node_modules/
+dist/
+dist-ssr/
+coverage/
+playwright-report/
+
+# Local databases and backups
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+*.bak
 
 # User-specific files
 *.rsuser
@@ -484,5 +503,9 @@ $RECYCLE.BIN/
 *.swp
 
 
-appsettings.Development.json
+# Environment-specific ASP.NET configuration may contain credentials
+appsettings.*.json
+!appsettings.*.example.json
 .dotnet-home/
+.nuget-packages/
+.data-protection-keys/
