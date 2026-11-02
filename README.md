@@ -50,7 +50,7 @@ A aplicação será exposta em `http://localhost:5173` e encaminhará chamadas `
 1. Tela pública de boas-vindas.
 2. Cadastro ou login.
 3. Onboarding com capital inicial, perfil CLT/PJ e configuração de renda.
-4. Dashboard com visão geral, lançamentos e espaço reservado para gráficos.
+4. Dashboard mensal com visão geral, lançamentos e gráficos mensais e anuais. A navegação lateral oferece uma consulta por períodos (dia, últimos 7 ou 30 dias, mês, ano ou intervalo personalizado), além de páginas próprias para investimentos e planejamento mensal.
 5. Cadastro de receitas, despesas únicas, despesas mensais e compras parceladas com término definido.
 
 As decisões funcionais desta versão estão documentadas em [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md).
