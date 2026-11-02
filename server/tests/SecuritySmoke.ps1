@@ -83,9 +83,15 @@ try {
 
     $bCategories = @(Invoke-RestMethod -Uri "$BaseUrl/categories" -WebSession $sessions[1])
     $bEntries = @(Invoke-RestMethod -Uri "$BaseUrl/transactions?year=2026&month=10" -WebSession $sessions[1])
+    $aRange = @(Invoke-RestMethod -Uri "$BaseUrl/transactions?from=2026-09-30&to=2026-10-01" -WebSession $sessions[0])
+    $bRange = @(Invoke-RestMethod -Uri "$BaseUrl/transactions?from=2026-09-30&to=2026-10-01" -WebSession $sessions[1])
     $bDashboard = Invoke-RestMethod -Uri "$BaseUrl/dashboard?year=2026&month=10" -WebSession $sessions[1]
     Assert (@($bCategories | Where-Object { $_.id -eq $category.id }).Count -eq 0) 'Etiqueta apareceu em outra conta.'
     Assert (@($bEntries | Where-Object { $_.id -eq $entry.id }).Count -eq 0) 'Lancamento apareceu em outra conta.'
+    Assert (@($aRange | Where-Object { $_.id -eq $entry.id }).Count -eq 1) 'O filtro por intervalo nao incluiu a data final.'
+    Assert (@($bRange | Where-Object { $_.id -eq $entry.id }).Count -eq 0) 'Filtro por intervalo mostrou dados de outra conta.'
+    Assert ((Get-HttpStatus $sessions[0] 'Get' '/transactions?from=2025-01-01&to=2026-10-01') -eq 400) 'Intervalo excessivo foi aceito.'
+    Assert ((Get-HttpStatus $sessions[0] 'Get' '/transactions?from=2026-10-02&to=2026-10-01') -eq 400) 'Intervalo invertido foi aceito.'
     Assert ($bDashboard.monthlyIncome -eq 0 -and $bDashboard.investedBalance -eq 0) 'Resumo misturou dados de contas.'
 
     $aEntry = Invoke-RestMethod -Uri "$BaseUrl/transactions/$($entry.id)" -WebSession $sessions[0]
