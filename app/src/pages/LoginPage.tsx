@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { AuthShell } from '../components/layout/AuthShell'
@@ -7,6 +7,8 @@ import { AuthShell } from '../components/layout/AuthShell'
 export function LoginPage() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const sessionExpired = (location.state as { sessionExpired?: boolean } | null)?.sessionExpired === true
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -33,6 +35,7 @@ export function LoginPage() {
         <span className="eyebrow">Acesso</span>
         <h1>Bem-vindo de volta</h1>
         <p>Entre para acessar seu panorama financeiro.</p>
+        {sessionExpired && <div className="form-error" role="status">Sua sessão expirou. Entre novamente para continuar.</div>}
         <form onSubmit={handleSubmit}>
           <label>E-mail<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
           <label>Senha<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>

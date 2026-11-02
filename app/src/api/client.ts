@@ -1,5 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL ?? '/api'
 let csrfTokenPromise: Promise<string> | null = null
+const sessionExpiredListeners = new Set<() => void>()
+
+export function onSessionExpired(listener: () => void): () => void {
+  sessionExpiredListeners.add(listener)
+  return () => { sessionExpiredListeners.delete(listener) }
+}
 
 export class ApiError extends Error {
   status: number
@@ -58,6 +64,10 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}, retryC
     if (retryCsrf && response.headers.get('X-CSRF-Invalid') === '1') {
       csrfTokenPromise = null
       return apiRequest<T>(path, init, false)
+    }
+    if (response.status === 401 && !['/auth/login', '/auth/me', '/auth/register-and-onboard'].includes(path)) {
+      csrfTokenPromise = null
+      sessionExpiredListeners.forEach((listener) => listener())
     }
     throw new ApiError(publicErrorMessage(path, response.status), response.status)
   }

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { apiRequest } from '../api/client'
+import { useNavigate } from 'react-router-dom'
+import { apiRequest, onSessionExpired } from '../api/client'
 import type { AuthSession, OnboardingSetupInput } from '../types/api'
 
 export interface RegistrationDraft {
@@ -34,6 +35,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const navigate = useNavigate()
   const [user, setUser] = useState<AuthSession | null>(null)
   const [registrationDraft, setRegistrationDraft] = useState<RegistrationDraft | null>(null)
   const [registrationSetupDraft, setRegistrationSetupDraft] = useState<RegistrationSetupDraft | null>(null)
@@ -41,6 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try { setUser(await apiRequest<AuthSession>('/auth/me')) } catch { setUser(null) } finally { setLoading(false) }
   }, [])
+
+  useEffect(() => onSessionExpired(() => {
+    setUser(null)
+    navigate('/acesso', { replace: true, state: { sessionExpired: true } })
+  }), [navigate])
 
   useEffect(() => { void refresh() }, [refresh])
 
@@ -68,8 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return session
     },
     async logout() {
-      await apiRequest<void>('/auth/logout', { method: 'POST' })
-      setUser(null)
+      try {
+        await apiRequest<void>('/auth/logout', { method: 'POST' })
+      } finally {
+        setUser(null)
+      }
     },
     refresh,
   }), [loading, refresh, registrationDraft, registrationSetupDraft, user])
