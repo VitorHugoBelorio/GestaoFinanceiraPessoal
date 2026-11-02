@@ -52,6 +52,13 @@ export interface InvestmentMovement {
   amount: number
   date: string
   note: string | null
+  isFromMonthlyIncome: boolean
+}
+
+export interface InvestmentAllocation {
+  id: number
+  name: string
+  amount: number
 }
 
 export interface DashboardData {
@@ -59,6 +66,7 @@ export interface DashboardData {
   month: number
   totalBalance: number
   monthlyIncome: number
+  monthlyPrimaryIncome: number
   monthlyExpense: number
   monthlyBalance: number
   incomeReminderDue: boolean
@@ -71,7 +79,11 @@ export interface DashboardData {
   availableBalance: number
   monthlySpendingPlan: number | null
   monthlySpendingRemaining: number | null
+  monthlySpendingBaseAmount: number | null
+  monthlySpendingCarryIn: number
+  monthlySpendingCarryOverUnused: boolean
   monthlyContributions: number
+  monthlyIncomeInvested: number
   monthlyWithdrawals: number
   monthlyInvestmentMovements: InvestmentMovement[]
 }

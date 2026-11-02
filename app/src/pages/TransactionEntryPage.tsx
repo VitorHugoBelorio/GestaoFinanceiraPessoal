@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import { LoadingState } from '../components/ui/LoadingState'
 import { DashboardSidebar } from '../features/dashboard/components/DashboardSidebar'
 import { TransactionForm } from '../features/dashboard/components/TransactionForm'
-import { readDashboardOrigin, isMonthlyIncomeEntry, type DashboardOrigin } from '../features/dashboard/dashboard.navigation'
+import { readDashboardOrigin, readPeriodSelection, isMonthlyIncomeEntry, originForSavedTransaction, periodForSavedTransaction, type DashboardOrigin } from '../features/dashboard/dashboard.navigation'
 import { useSidebarCollapsed } from '../features/dashboard/useSidebarCollapsed'
 import type { Category, OnboardingStatus, TransactionType } from '../types/api'
 
@@ -41,8 +41,18 @@ export function TransactionEntryPage({ type }: { type: TransactionType }) {
     return () => { active = false }
   }, [])
 
-  function returnToDashboard(destination = origin) {
-    navigate('/app', { replace: true, state: { origin: destination } })
+  function returnToDashboard(destination = origin, savedDate?: string) {
+    const visibleDestination = savedDate ? originForSavedTransaction({ ...destination, categoryFilter: 'all' }, savedDate) : destination
+    if (location.state && typeof location.state === 'object' && 'returnToInvestments' in location.state && location.state.returnToInvestments === true) {
+      navigate('/app/investimentos', { replace: true, state: { origin: visibleDestination, resumeIncomeContribution: true } })
+      return
+    }
+    const periodSelection = readPeriodSelection(location.state)
+    if (periodSelection) {
+      navigate('/app/periodos', { replace: true, state: { periodSelection: savedDate ? periodForSavedTransaction(periodSelection, savedDate) : periodSelection } })
+      return
+    }
+    navigate('/app', { replace: true, state: { origin: visibleDestination } })
   }
 
   async function handleLogout() {
@@ -60,7 +70,10 @@ export function TransactionEntryPage({ type }: { type: TransactionType }) {
         navigationOnly
         onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
         onLogout={() => { void handleLogout() }}
-        onTabChange={(tab) => returnToDashboard({ ...origin, tab })}
+        onTabChange={(tab) => navigate('/app', { state: { origin: { ...origin, tab } } })}
+        onInvestmentsClick={() => navigate('/app/investimentos', { state: { origin } })}
+        onPeriodsClick={() => navigate('/app/periodos', { state: { origin, periodSelection: readPeriodSelection(location.state) } })}
+        onPlanningClick={() => navigate('/app/planejamento', { state: { origin } })}
       />
       <main className="dashboard-content transaction-entry-page">
         <button className="back-link" type="button" onClick={() => returnToDashboard()}>← Voltar</button>
@@ -80,7 +93,7 @@ export function TransactionEntryPage({ type }: { type: TransactionType }) {
             initialMonthlyIncome={isIncome && employmentType === 'Pj' && isMonthlyIncomeEntry(location.state)}
             categories={categories}
             onCategoryCreated={(category) => setCategories((current) => [...current, category].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR')))}
-            onCreated={() => returnToDashboard()}
+            onCreated={(created) => returnToDashboard(origin, created.date)}
           />
         )}
       </main>

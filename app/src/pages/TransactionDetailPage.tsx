@@ -6,10 +6,11 @@ import { LoadingState } from '../components/ui/LoadingState'
 import { CategoryPicker } from '../features/dashboard/components/CategoryPicker'
 import { DashboardSidebar } from '../features/dashboard/components/DashboardSidebar'
 import { currencyFormatter } from '../features/dashboard/dashboard.formatters'
-import { readDashboardOrigin } from '../features/dashboard/dashboard.navigation'
+import { originForSavedTransaction, periodForSavedTransaction, readDashboardOrigin, readPeriodSelection } from '../features/dashboard/dashboard.navigation'
 import { useSidebarCollapsed } from '../features/dashboard/useSidebarCollapsed'
 import type { Category, FinancialTransaction } from '../types/api'
 import { formatMoneyInput, parseMoney } from '../utils/money'
+import { isTransactionDetail } from '../utils/financialData'
 
 type EditDraft = {
   description: string
@@ -19,6 +20,7 @@ type EditDraft = {
   categoryId: number | null
   endMonth: string
   totalPurchaseAmount: string
+  isMonthlyIncome: boolean
 }
 
 function makeDraft(transaction: FinancialTransaction): EditDraft {
@@ -30,6 +32,7 @@ function makeDraft(transaction: FinancialTransaction): EditDraft {
     categoryId: transaction.categoryId,
     endMonth: transaction.recurrenceEndDate?.slice(0, 7) ?? '',
     totalPurchaseAmount: transaction.totalPurchaseAmount === null ? '' : formatMoneyInput(String(Math.round(transaction.totalPurchaseAmount * 100))),
+    isMonthlyIncome: transaction.isMonthlyIncome,
   }
 }
 
@@ -68,9 +71,10 @@ export function TransactionDetailPage() {
       setLoading(false)
       return
     }
-    Promise.all([apiRequest<FinancialTransaction>(`/transactions/${id}`), apiRequest<Category[]>('/categories')])
+    Promise.all([apiRequest<unknown>(`/transactions/${id}`), apiRequest<Category[]>('/categories')])
       .then(([entry, categoryData]) => {
         if (!active) return
+        if (!isTransactionDetail(entry)) throw new Error('Dados do lançamento incompletos.')
         setTransaction(entry)
         setDraft(makeDraft(entry))
         setCategories(categoryData)
@@ -82,14 +86,20 @@ export function TransactionDetailPage() {
     return () => { active = false }
   }, [id])
 
-  function returnToDashboard(tab = origin?.tab ?? 'transactions') {
+  function returnToDashboard(tab = origin?.tab ?? 'transactions', savedDate?: string) {
+    const periodSelection = readPeriodSelection(location.state)
+    if (periodSelection) {
+      navigate('/app/periodos', { replace: true, state: { periodSelection: savedDate ? periodForSavedTransaction(periodSelection, savedDate) : periodSelection } })
+      return
+    }
     const [year, month] = (transaction?.date ?? '').split('-').map(Number)
     const today = new Date()
+    const destination = origin
+      ? { ...origin, tab, categoryFilter: savedDate ? 'all' : origin.categoryFilter }
+      : { tab, year: year || today.getFullYear(), month: month || today.getMonth() + 1, categoryFilter: 'all' }
     navigate('/app', {
       replace: true,
-      state: { origin: origin
-        ? { ...origin, tab }
-        : { tab, year: year || today.getFullYear(), month: month || today.getMonth() + 1, categoryFilter: 'all' } },
+      state: { origin: savedDate ? originForSavedTransaction(destination, savedDate) : destination },
     })
   }
 
@@ -140,9 +150,10 @@ export function TransactionDetailPage() {
           categoryId: draft.categoryId,
           recurrenceEndDate: transaction.isRecurring && draft.endMonth ? monthEnd(draft.endMonth) : null,
           totalPurchaseAmount: transaction.isInstallment && draft.totalPurchaseAmount ? parseMoney(draft.totalPurchaseAmount) : null,
+          isMonthlyIncome: transaction.type === 'Income' && !transaction.isRecurring ? draft.isMonthlyIncome : null,
         }),
       })
-      returnToDashboard()
+      returnToDashboard(origin?.tab ?? 'transactions', draft.date)
     } catch (requestError) {
       setError(requestError instanceof ApiError ? requestError.message : 'Não foi possível salvar as alterações. Tente novamente.')
     } finally { setSaving(false) }
@@ -172,7 +183,10 @@ export function TransactionDetailPage() {
         navigationOnly
         onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
         onLogout={() => { void handleLogout() }}
-        onTabChange={returnToDashboard}
+        onTabChange={(tab) => navigate('/app', { state: { origin: { tab, year: origin?.year ?? new Date().getFullYear(), month: origin?.month ?? new Date().getMonth() + 1, categoryFilter: origin?.categoryFilter ?? 'all' } } })}
+        onInvestmentsClick={() => navigate('/app/investimentos', { state: { origin } })}
+        onPeriodsClick={() => navigate('/app/periodos', { state: { origin, periodSelection: readPeriodSelection(location.state) } })}
+        onPlanningClick={() => navigate('/app/planejamento', { state: { origin } })}
       />
       <main className="dashboard-content transaction-entry-page transaction-detail-page">
         <button className="back-link" type="button" onClick={() => returnToDashboard()}>← Voltar aos lançamentos</button>
@@ -191,7 +205,7 @@ export function TransactionDetailPage() {
               <div><dt>Tipo</dt><dd>{isIncome ? 'Receita' : 'Despesa'}</dd></div>
               <div><dt>Etiqueta</dt><dd>{transaction.categoryName ?? 'Sem etiqueta'}</dd></div>
               <div><dt>Registro</dt><dd>{transaction.status === 'Planned' ? 'Previsto' : 'Confirmado'}</dd></div>
-              {transaction.isMonthlyIncome && <div><dt>Recebimento PJ</dt><dd>Registrado para este mês</dd></div>}
+              {transaction.isMonthlyIncome && <div><dt>Recebimento principal</dt><dd>Contabilizado no cartão “Recebimento do mês”</dd></div>}
               {transaction.isRecurring && <>
                 <div><dt>Primeiro lançamento</dt><dd>{displayDate(transaction.recurrenceStartDate ?? transaction.date)}</dd></div>
                 <div><dt>Repetição</dt><dd>Mensal{transaction.recurrenceEndDate ? ` até ${transaction.recurrenceEndDate.slice(0, 7).split('-').reverse().join('/')}` : ', sem data final'}</dd></div>
@@ -216,6 +230,7 @@ export function TransactionDetailPage() {
             {transaction.isRecurring && <p className="field-hint transaction-detail-full">A data desta ocorrência fica fixa para manter a sequência mensal.</p>}
             <CategoryPicker type={transaction.type} categories={categories} value={draft.categoryId} onChange={(categoryId) => setDraft({ ...draft, categoryId })} onCreated={(category) => setCategories((current) => [...current, category].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR')))} />
             <label className="transaction-note-field">Observação (opcional)<textarea value={draft.note} maxLength={1000} rows={4} onChange={(event) => setDraft({ ...draft, note: event.target.value })} /><span className="field-hint">{draft.note.length}/1000 caracteres</span></label>
+            {transaction.type === 'Income' && !transaction.isRecurring && <label className="checkbox-label"><input type="checkbox" checked={draft.isMonthlyIncome} onChange={(event) => setDraft({ ...draft, isMonthlyIncome: event.target.checked })} />Este é meu salário ou recebimento principal do mês</label>}
             {transaction.isRecurring && <div className="installment-fields"><label>Mês do último lançamento {transaction.isInstallment ? '' : '(opcional)'}<input type="month" lang="pt-BR" value={draft.endMonth} min={(transaction.recurrenceStartDate ?? transaction.date).slice(0, 7)} required={transaction.isInstallment} onChange={(event) => setDraft({ ...draft, endMonth: event.target.value })} /></label>{transaction.isInstallment && <label>Valor total do compromisso (opcional)<input inputMode="numeric" value={draft.totalPurchaseAmount} onChange={(event) => setDraft({ ...draft, totalPurchaseAmount: formatMoneyInput(event.target.value) })} placeholder="0,00" /></label>}<p className="field-hint">Ao encurtar o período, os lançamentos posteriores ao novo mês final são removidos. Ao ampliar, os próximos meses serão gerados conforme a nova data.</p></div>}
             {error && <div className="form-error" role="alert">{error}</div>}
             <div className="transaction-detail-actions transaction-detail-full"><button className="transaction-detail-cancel" type="button" disabled={saving} onClick={() => { setDraft(makeDraft(transaction)); setEditing(false); setError('') }}>Cancelar edição</button><button className={`transaction-submit ${isIncome ? 'transaction-submit-income' : 'transaction-submit-expense'}`} type="submit" disabled={saving} aria-busy={saving}>{saving ? 'Salvando...' : 'Salvar alterações'}</button></div>

@@ -8,6 +8,7 @@ type CurrencyInputProps = {
 
 export function CurrencyInput({ value, onValueChange }: CurrencyInputProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const displayValue = /^\d{1,3}(?:\.\d{3})*,\d{2}$/.test(value) ? value : '0,00'
 
   function moveCaretToEnd() {
     const input = inputRef.current
@@ -26,7 +27,7 @@ export function CurrencyInput({ value, onValueChange }: CurrencyInputProps) {
         type="text"
         inputMode="numeric"
         autoComplete="off"
-        value={value || '0,00'}
+        value={displayValue}
         onChange={(event) => onValueChange(formatMoneyInput(event.currentTarget.value))}
         onFocus={moveCaretToEnd}
         onClick={moveCaretToEnd}

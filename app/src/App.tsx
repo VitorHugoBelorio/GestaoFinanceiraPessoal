@@ -7,6 +7,8 @@ import { LoadingState } from './components/ui/LoadingState'
 import { routeVariants } from './motion/variants'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { InvestmentsPage, MonthlyPlanningPage } from './pages/InvestmentsPage'
+import { PeriodsPage } from './pages/PeriodsPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { TransactionEntryPage } from './pages/TransactionEntryPage'
@@ -48,6 +50,9 @@ export function App() {
           <Route path="/cadastro" element={<RegisterPage />} />
           <Route path="/primeiros-passos" element={<RequireOnboardingAccess><OnboardingPage /></RequireOnboardingAccess>} />
           <Route path="/app" element={<RequireAuth onboardingRequired><DashboardPage /></RequireAuth>} />
+          <Route path="/app/investimentos" element={<RequireAuth onboardingRequired><InvestmentsPage /></RequireAuth>} />
+          <Route path="/app/planejamento" element={<RequireAuth onboardingRequired><MonthlyPlanningPage /></RequireAuth>} />
+          <Route path="/app/periodos" element={<RequireAuth onboardingRequired><PeriodsPage /></RequireAuth>} />
           <Route path="/app/lancamentos/receita" element={<RequireAuth onboardingRequired><TransactionEntryPage type="Income" /></RequireAuth>} />
           <Route path="/app/lancamentos/despesa" element={<RequireAuth onboardingRequired><TransactionEntryPage type="Expense" /></RequireAuth>} />
           <Route path="/app/lancamentos/:id" element={<RequireAuth onboardingRequired><TransactionDetailPage /></RequireAuth>} />

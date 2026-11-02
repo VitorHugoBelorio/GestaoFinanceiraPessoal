@@ -10,10 +10,10 @@ export function SummaryCards({ dashboard }: { dashboard: DashboardData }) {
         <span>Saldo total</span><strong>{currencyFormatter.format(dashboard.totalBalance)}</strong><small>Capital acumulado</small>
       </m.article>
       <m.article variants={fadeUpItem} className="summary-card summary-card-featured">
-        <span>Saldo do mês</span><strong className={dashboard.monthlyBalance >= 0 ? 'positive' : 'negative'}>{currencyFormatter.format(dashboard.monthlyBalance)}</strong><small>Receitas menos despesas</small>
+        <span>Recebimento do mês</span><strong className="positive">{currencyFormatter.format(dashboard.monthlyPrimaryIncome)}</strong><small>{dashboard.monthlyPrimaryIncome > 0 ? 'Salário ou recebimento principal confirmado' : 'Identifique o salário ou recebimento ao registrar a receita'}</small>
       </m.article>
       <m.article variants={fadeUpItem} className="summary-card">
-        <span>Receitas do mês</span><strong className="positive">{currencyFormatter.format(dashboard.monthlyIncome)}</strong><small>Entradas confirmadas</small>
+        <span>Receitas do mês</span><strong className="positive">{currencyFormatter.format(dashboard.monthlyIncome)}</strong><small>{dashboard.monthlyPrimaryIncome > 0 ? 'Recebimento principal + outras entradas' : 'Todas as entradas confirmadas'}</small>
       </m.article>
       <m.article variants={fadeUpItem} className="summary-card">
         <span>Despesas do mês</span><strong className="negative">{currencyFormatter.format(dashboard.monthlyExpense)}</strong><small>Saídas confirmadas</small>

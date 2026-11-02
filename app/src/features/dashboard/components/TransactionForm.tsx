@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { ApiError, apiRequest } from '../../../api/client'
-import type { Category, TransactionType } from '../../../types/api'
+import type { Category, FinancialTransaction, TransactionType } from '../../../types/api'
 import { formatMoneyInput, parseMoney } from '../../../utils/money'
 import { currencyFormatter } from '../dashboard.formatters'
 import { CategoryPicker } from './CategoryPicker'
@@ -14,7 +14,7 @@ type TransactionFormProps = {
   initialMonthlyIncome?: boolean
   categories: Category[]
   onCategoryCreated(category: Category): void
-  onCreated(): void
+  onCreated(transaction: FinancialTransaction): void
 }
 
 export function TransactionForm({ referenceDate, isPj = false, type, initialMonthlyIncome = false, categories, onCategoryCreated, onCreated }: TransactionFormProps) {
@@ -59,7 +59,7 @@ export function TransactionForm({ referenceDate, isPj = false, type, initialMont
     setSubmitting(true)
 
     try {
-      await apiRequest('/transactions', {
+      const created = await apiRequest<FinancialTransaction>('/transactions', {
         method: 'POST',
         body: JSON.stringify({
           type,
@@ -73,11 +73,11 @@ export function TransactionForm({ referenceDate, isPj = false, type, initialMont
           isInstallment,
           totalPurchaseAmount: isInstallment && totalPurchaseAmount ? parseMoney(totalPurchaseAmount) : null,
           recurrenceEndDate: installmentEndDate,
-          isMonthlyIncome: isPj && type === 'Income' && isMonthlyIncome,
+          isMonthlyIncome: type === 'Income' && isMonthlyIncome,
           recurrenceDayOfMonth: recurrenceMode === 'monthly' ? Number(date.slice(-2)) : null,
         }),
       })
-      onCreated()
+      onCreated(created)
     } catch (requestError) {
       if (requestError instanceof ApiError && requestError.status >= 500) {
         setError(`Não foi possível salvar ${type === 'Income' ? 'a receita' : 'a despesa'} agora. Tente novamente em instantes.`)
@@ -96,7 +96,7 @@ export function TransactionForm({ referenceDate, isPj = false, type, initialMont
       <label>{isInstallment ? 'Data do primeiro lançamento' : 'Data'}<input type="date" lang="pt-BR" value={date} max={isMonthlyIncome ? todayIso : undefined} onChange={(event) => setDate(event.target.value)} required /></label>
       <CategoryPicker key={type} type={type} categories={categories} value={categoryId} onChange={setCategoryId} onCreated={onCategoryCreated} />
       <label className="transaction-note-field">Observação (opcional)<textarea value={note} onChange={(event) => setNote(event.target.value)} maxLength={1000} rows={3} placeholder="Anote algo importante sobre este lançamento" /><span className="field-hint">{note.length}/1000 caracteres. Em lançamentos recorrentes, a observação acompanha as próximas ocorrências.</span></label>
-      {isPj && type === 'Income' && <label className="checkbox-label"><input type="checkbox" checked={isMonthlyIncome} onChange={(event) => { setIsMonthlyIncome(event.target.checked); if (event.target.checked) setRecurrenceMode('none') }} />Este é meu recebimento PJ do mês</label>}
+      {type === 'Income' && <label className="checkbox-label"><input type="checkbox" checked={isMonthlyIncome} onChange={(event) => { setIsMonthlyIncome(event.target.checked); if (event.target.checked) setRecurrenceMode('none') }} />{isPj ? 'Este é meu recebimento PJ do mês' : 'Este é meu salário ou recebimento principal do mês'}</label>}
       {type === 'Expense' && <fieldset className="recurrence-options"><legend>Como registrar esta despesa?</legend><label><input type="radio" name="expense-recurrence" checked={recurrenceMode === 'none'} onChange={() => setRecurrenceMode('none')} />Uma vez</label><label><input type="radio" name="expense-recurrence" checked={recurrenceMode === 'monthly'} onChange={() => setRecurrenceMode('monthly')} />Mensal, sem data final</label><label><input type="radio" name="expense-recurrence" checked={recurrenceMode === 'installments'} onChange={() => setRecurrenceMode('installments')} />Mensal, com data final</label></fieldset>}
       {type === 'Income' && !isMonthlyIncome && <label className="checkbox-label"><input type="checkbox" checked={recurrenceMode === 'monthly'} onChange={(event) => setRecurrenceMode(event.target.checked ? 'monthly' : 'none')} />Repetir mensalmente</label>}
       {isInstallment && <div className="installment-fields"><label>Mês do último lançamento<input type="month" lang="pt-BR" value={installmentEndMonth} min={date.slice(0, 7)} onChange={(event) => setInstallmentEndMonth(event.target.value)} required /></label><label>Valor total do compromisso (opcional)<input inputMode="numeric" value={totalPurchaseAmount} onChange={(event) => setTotalPurchaseAmount(formatMoneyInput(event.target.value))} placeholder="0,00" /></label><p className="field-hint">Use para compras parceladas ou outras despesas com prazo definido. O total é apenas uma referência; o saldo considera cada lançamento mensal.</p>{installmentCount >= 2 && amount && <p className="installment-preview">{installmentCount} lançamentos de {currencyFormatter.format(parseMoney(amount))} · Total previsto: {currencyFormatter.format(installmentCount * parseMoney(amount))}</p>}</div>}

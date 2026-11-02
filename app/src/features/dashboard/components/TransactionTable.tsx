@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import * as m from 'motion/react-m'
 import { fadeUpItem, staggerContainer } from '../../../motion/variants'
 import type { FinancialTransaction } from '../../../types/api'
@@ -7,7 +8,7 @@ import { EntryActionButton } from './EntryActionButton'
 type TransactionTableProps = {
   title?: string
   transactions: FinancialTransaction[]
-  emptyMessage?: string
+  emptyMessage?: ReactNode
   onAddIncome?: () => void
   onAddExpense?: () => void
   onViewTransaction?: (transaction: FinancialTransaction) => void
@@ -32,7 +33,7 @@ export function TransactionTable({ title, transactions, emptyMessage = 'Nenhum l
               {transactions.map((transaction) => (
                 <m.tr variants={fadeUpItem} key={transaction.id} className={onViewTransaction ? 'transaction-clickable-row' : undefined} onClick={() => onViewTransaction?.(transaction)}>
                   <td>{new Date(`${transaction.date}T12:00:00`).toLocaleDateString('pt-BR')}</td>
-                  <td>{onViewTransaction ? <button type="button" className="transaction-row-link" aria-label={`Ver detalhes de ${transaction.description}`} onClick={(event) => { event.stopPropagation(); onViewTransaction(transaction) }}>{transaction.description}<span aria-hidden="true">↗</span></button> : transaction.description}{transaction.isInstallment ? <small>Lançamento {transaction.installmentNumber}/{transaction.installmentCount}</small> : transaction.isRecurring && <small>Mensal</small>}{transaction.isInstallment && transaction.totalPurchaseAmount !== null && <small>Total informado: {currencyFormatter.format(transaction.totalPurchaseAmount)}</small>}</td>
+                  <td>{onViewTransaction ? <button type="button" className="transaction-row-link" aria-label={`Ver detalhes de ${transaction.description}`} onClick={(event) => { event.stopPropagation(); onViewTransaction(transaction) }}>{transaction.description}<span aria-hidden="true">↗</span></button> : transaction.description}{transaction.status === 'Planned' && <small>Previsto · não entra nos totais confirmados</small>}{transaction.isInstallment ? <small>Lançamento {transaction.installmentNumber}/{transaction.installmentCount}</small> : transaction.isRecurring && <small>Mensal</small>}{transaction.isInstallment && transaction.totalPurchaseAmount !== null && <small>Total informado: {currencyFormatter.format(transaction.totalPurchaseAmount)}</small>}</td>
                   <td><span className={`type-badge ${transaction.type === 'Income' ? 'income' : 'expense'}`}>{transaction.type === 'Income' ? 'Receita' : 'Despesa'}</span></td>
                   <td>{transaction.categoryName ? <span className="category-badge">{transaction.categoryName}</span> : <span className="category-empty">—</span>}</td>
                   <td className="transaction-note-cell"><TransactionNote note={transaction.note} /></td>
