@@ -156,6 +156,34 @@ namespace GestaoFinanceiraPessoal.Api.Data.Migrations
                     b.ToTable("Transactions");
                 });
 
+            modelBuilder.Entity("GestaoFinanceiraPessoal.Api.Domain.Entities.InvestmentAllocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("InvestmentAllocations");
+                });
+
             modelBuilder.Entity("GestaoFinanceiraPessoal.Api.Domain.Entities.InvestmentMovement", b =>
                 {
                     b.Property<int>("Id")
@@ -173,6 +201,11 @@ namespace GestaoFinanceiraPessoal.Api.Data.Migrations
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
+
+                    b.Property<bool>("IsFromMonthlyIncome")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
@@ -204,6 +237,9 @@ namespace GestaoFinanceiraPessoal.Api.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("CarryOverUnused")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Month")
                         .HasColumnType("int");
@@ -256,6 +292,11 @@ namespace GestaoFinanceiraPessoal.Api.Data.Migrations
 
                     b.Property<bool>("IsInstallment")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsMonthlyIncome")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateOnly>("NextOccurrenceDate")
                         .HasColumnType("date");
@@ -373,6 +414,17 @@ namespace GestaoFinanceiraPessoal.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("GestaoFinanceiraPessoal.Api.Domain.Entities.InvestmentAllocation", b =>
+                {
+                    b.HasOne("GestaoFinanceiraPessoal.Api.Domain.Entities.User", "User")
+                        .WithMany("InvestmentAllocations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("GestaoFinanceiraPessoal.Api.Domain.Entities.InvestmentMovement", b =>
                 {
                     b.HasOne("GestaoFinanceiraPessoal.Api.Domain.Entities.User", "User")
@@ -430,6 +482,8 @@ namespace GestaoFinanceiraPessoal.Api.Data.Migrations
                     b.Navigation("Categories");
 
                     b.Navigation("FinancialProfile");
+
+                    b.Navigation("InvestmentAllocations");
 
                     b.Navigation("InvestmentMovements");
 

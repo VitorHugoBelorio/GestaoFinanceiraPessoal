@@ -7,6 +7,7 @@ public class MonthlySpendingPlan
     public int Year { get; set; }
     public int Month { get; set; }
     public decimal Amount { get; set; }
+    public bool CarryOverUnused { get; set; }
 
     public User User { get; set; } = null!;
 }

@@ -42,6 +42,7 @@ public static class OnboardingSetupService
             Type = TransactionType.Income,
             Description = "Renda mensal",
             Amount = request.FixedMonthlyIncome!.Value,
+            IsMonthlyIncome = true,
             DayOfMonth = dayOfMonth,
             StartDate = firstOccurrence,
             NextOccurrenceDate = firstOccurrence

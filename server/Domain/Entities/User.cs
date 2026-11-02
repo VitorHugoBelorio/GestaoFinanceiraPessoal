@@ -14,5 +14,6 @@ public class User
     public ICollection<FinancialTransaction> Transactions { get; set; } = [];
     public ICollection<RecurringTransaction> RecurringTransactions { get; set; } = [];
     public ICollection<InvestmentMovement> InvestmentMovements { get; set; } = [];
+    public ICollection<InvestmentAllocation> InvestmentAllocations { get; set; } = [];
     public ICollection<MonthlySpendingPlan> MonthlySpendingPlans { get; set; } = [];
 }

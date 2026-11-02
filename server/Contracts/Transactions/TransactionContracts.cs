@@ -59,7 +59,7 @@ public class CreateTransactionRequest : IValidatableObject
 
         if (IsMonthlyIncome && IsRecurring)
         {
-            yield return new ValidationResult("O recebimento PJ deve ser registrado em cada mês, sem recorrência automática.", [nameof(IsRecurring)]);
+            yield return new ValidationResult("Registre o recebimento principal de cada mês individualmente, sem recorrência automática.", [nameof(IsRecurring)]);
         }
 
         if (IsMonthlyIncome && Status != TransactionStatus.Confirmed)
@@ -171,6 +171,8 @@ public class UpdateTransactionRequest : IValidatableObject
     public decimal Amount { get; set; }
 
     public DateOnly Date { get; set; }
+
+    public bool? IsMonthlyIncome { get; set; }
 
     public int? CategoryId { get; set; }
 

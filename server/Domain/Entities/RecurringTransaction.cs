@@ -10,6 +10,7 @@ public class RecurringTransaction
     public string Description { get; set; } = string.Empty;
     public string? Note { get; set; }
     public decimal Amount { get; set; }
+    public bool IsMonthlyIncome { get; set; }
     public int DayOfMonth { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly? EndDate { get; set; }

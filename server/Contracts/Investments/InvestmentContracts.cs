@@ -20,6 +20,8 @@ public class SetMonthlySpendingPlanRequest
 
     [Range(typeof(decimal), "0", "9999999999999999.99", ParseLimitsInInvariantCulture = true)]
     public decimal? Amount { get; set; }
+
+    public bool CarryOverUnused { get; set; }
 }
 
 public class CreateInvestmentMovementRequest : IValidatableObject
@@ -35,8 +37,17 @@ public class CreateInvestmentMovementRequest : IValidatableObject
     [StringLength(500)]
     public string? Note { get; set; }
 
+    public bool IsFromMonthlyIncome { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (Type == InvestmentMovementType.Withdrawal && IsFromMonthlyIncome)
+        {
+            yield return new ValidationResult(
+                "A origem na renda mensal só pode ser usada em aportes.",
+                [nameof(IsFromMonthlyIncome)]);
+        }
+
         if (Date.Year < 2000 || Date > DateOnly.FromDateTime(DateTime.Today))
         {
             yield return new ValidationResult(
@@ -51,8 +62,24 @@ public record InvestmentMovementResponse(
     InvestmentMovementType Type,
     decimal Amount,
     DateOnly Date,
-    string? Note)
+    string? Note,
+    bool IsFromMonthlyIncome)
 {
     public static InvestmentMovementResponse FromEntity(InvestmentMovement movement) =>
-        new(movement.Id, movement.Type, movement.Amount, movement.Date, movement.Note);
+        new(movement.Id, movement.Type, movement.Amount, movement.Date, movement.Note, movement.IsFromMonthlyIncome);
+}
+
+public class SaveInvestmentAllocationRequest
+{
+    [Required, StringLength(80, MinimumLength = 1)]
+    public string Name { get; set; } = string.Empty;
+
+    [Range(typeof(decimal), "0.01", "9999999999999999.99", ParseLimitsInInvariantCulture = true)]
+    public decimal Amount { get; set; }
+}
+
+public record InvestmentAllocationResponse(int Id, string Name, decimal Amount)
+{
+    public static InvestmentAllocationResponse FromEntity(InvestmentAllocation allocation) =>
+        new(allocation.Id, allocation.Name, allocation.Amount);
 }

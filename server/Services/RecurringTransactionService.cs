@@ -73,6 +73,7 @@ public class RecurringTransactionService(ApplicationDbContext dbContext)
                         Description = recurring.Description,
                         Note = recurring.Note,
                         Amount = recurring.Amount,
+                        IsMonthlyIncome = recurring.IsMonthlyIncome,
                         Date = occurrenceDate,
                         Status = occurrenceDate <= today
                             ? TransactionStatus.Confirmed

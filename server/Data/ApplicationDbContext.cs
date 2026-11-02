@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<FinancialTransaction> Transactions => Set<FinancialTransaction>();
     public DbSet<RecurringTransaction> RecurringTransactions => Set<RecurringTransaction>();
     public DbSet<InvestmentMovement> InvestmentMovements => Set<InvestmentMovement>();
+    public DbSet<InvestmentAllocation> InvestmentAllocations => Set<InvestmentAllocation>();
     public DbSet<MonthlySpendingPlan> MonthlySpendingPlans => Set<MonthlySpendingPlan>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -84,6 +85,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(recurring => recurring.Description).HasMaxLength(180);
             entity.Property(recurring => recurring.Note).HasMaxLength(1000);
             entity.Property(recurring => recurring.Amount).HasPrecision(18, 2);
+            entity.Property(recurring => recurring.IsMonthlyIncome).HasDefaultValue(false);
             entity.Property(recurring => recurring.TotalPurchaseAmount).HasPrecision(18, 2);
             entity.Property(recurring => recurring.Type).HasConversion<string>().HasMaxLength(20);
 
@@ -103,11 +105,23 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(movement => movement.Type).HasConversion<string>().HasMaxLength(20);
             entity.Property(movement => movement.Amount).HasPrecision(18, 2);
             entity.Property(movement => movement.Note).HasMaxLength(500);
+            entity.Property(movement => movement.IsFromMonthlyIncome).HasDefaultValue(false);
             entity.HasIndex(movement => new { movement.UserId, movement.Date });
 
             entity.HasOne(movement => movement.User)
                 .WithMany(user => user.InvestmentMovements)
                 .HasForeignKey(movement => movement.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<InvestmentAllocation>(entity =>
+        {
+            entity.Property(allocation => allocation.Name).HasMaxLength(80);
+            entity.Property(allocation => allocation.Amount).HasPrecision(18, 2);
+            entity.HasIndex(allocation => new { allocation.UserId, allocation.Name }).IsUnique();
+            entity.HasOne(allocation => allocation.User)
+                .WithMany(user => user.InvestmentAllocations)
+                .HasForeignKey(allocation => allocation.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

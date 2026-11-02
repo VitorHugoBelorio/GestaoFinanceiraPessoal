@@ -16,7 +16,8 @@ namespace GestaoFinanceiraPessoal.Api.Controllers;
 [Route("api/dashboard")]
 public class DashboardController(
     ApplicationDbContext dbContext,
-    RecurringTransactionService recurringTransactionService) : ControllerBase
+    RecurringTransactionService recurringTransactionService,
+    MonthlySpendingPlanService monthlySpendingPlanService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<DashboardResponse>> Get(
@@ -81,6 +82,10 @@ public class DashboardController(
             .Where(transaction => transaction.Type == TransactionType.Income)
             .Sum(transaction => transaction.Amount);
 
+        var monthlyPrimaryIncome = confirmedMonthlyTransactions
+            .Where(transaction => transaction.Type == TransactionType.Income && transaction.IsMonthlyIncome)
+            .Sum(transaction => transaction.Amount);
+
         var monthlyExpense = confirmedMonthlyTransactions
             .Where(transaction => transaction.Type == TransactionType.Expense)
             .Sum(transaction => transaction.Amount);
@@ -131,17 +136,20 @@ public class DashboardController(
         var monthlyInvestmentMovements = monthlyMovementEntities
             .Select(InvestmentMovementResponse.FromEntity)
             .ToList();
-        var monthlySpendingPlan = await dbContext.MonthlySpendingPlans
-            .AsNoTracking()
-            .Where(item => item.UserId == userId && item.Year == selectedYear && item.Month == selectedMonth)
-            .Select(item => (decimal?)item.Amount)
-            .FirstOrDefaultAsync(cancellationToken);
+        var spendingPlan = await monthlySpendingPlanService.GetSnapshotAsync(
+            userId,
+            selectedYear,
+            selectedMonth,
+            monthlyExpense,
+            today,
+            cancellationToken);
 
         return Ok(new DashboardResponse(
             selectedYear,
             selectedMonth,
             totalBalance,
             monthlyIncome,
+            monthlyPrimaryIncome,
             monthlyExpense,
             monthlyIncome - monthlyExpense,
             incomeReminderDue,
@@ -152,10 +160,16 @@ public class DashboardController(
             profile.OpeningInvestedAmount,
             investedBalance,
             totalBalance - investedBalance,
-            monthlySpendingPlan,
-            monthlySpendingPlan - monthlyExpense,
+            spendingPlan.EffectiveAmount,
+            spendingPlan.Remaining,
+            spendingPlan.BaseAmount,
+            spendingPlan.CarryIn,
+            spendingPlan.CarryOverUnused,
             monthlyInvestmentMovements
                 .Where(item => item.Type == InvestmentMovementType.Contribution)
+                .Sum(item => item.Amount),
+            monthlyInvestmentMovements
+                .Where(item => item.Type == InvestmentMovementType.Contribution && item.IsFromMonthlyIncome)
                 .Sum(item => item.Amount),
             monthlyInvestmentMovements
                 .Where(item => item.Type == InvestmentMovementType.Withdrawal)

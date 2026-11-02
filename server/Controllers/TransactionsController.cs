@@ -2,6 +2,7 @@ using GestaoFinanceiraPessoal.Api.Contracts.Transactions;
 using GestaoFinanceiraPessoal.Api.Data;
 using GestaoFinanceiraPessoal.Api.Domain;
 using GestaoFinanceiraPessoal.Api.Domain.Entities;
+using GestaoFinanceiraPessoal.Api.Domain.Enums;
 using GestaoFinanceiraPessoal.Api.Extensions;
 using GestaoFinanceiraPessoal.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -21,13 +22,19 @@ public class TransactionsController(
     public async Task<ActionResult<IReadOnlyCollection<TransactionResponse>>> List(
         [FromQuery] int? year,
         [FromQuery] int? month,
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
         CancellationToken cancellationToken)
     {
         var referenceDate = DateOnly.FromDateTime(DateTime.Today);
         var selectedYear = year ?? referenceDate.Year;
         var selectedMonth = month ?? referenceDate.Month;
 
-        if (selectedYear is < 2000 or > 2200 || selectedMonth is < 1 or > 12)
+        if (from.HasValue != to.HasValue
+            || (from.HasValue && (year.HasValue || month.HasValue))
+            || (from.HasValue && (from.Value.Year < 2000 || to!.Value > referenceDate.AddYears(1)
+                || from.Value > to.Value || to.Value.DayNumber - from.Value.DayNumber > 365))
+            || (!from.HasValue && (selectedYear is < 2000 or > 2200 || selectedMonth is < 1 or > 12)))
         {
             return BadRequest(new ProblemDetails
             {
@@ -38,8 +45,8 @@ public class TransactionsController(
 
         var userId = User.GetRequiredUserId();
 
-        var firstDay = new DateOnly(selectedYear, selectedMonth, 1);
-        var lastDay = new DateOnly(
+        var firstDay = from ?? new DateOnly(selectedYear, selectedMonth, 1);
+        var lastDay = to ?? new DateOnly(
             selectedYear,
             selectedMonth,
             DateTime.DaysInMonth(selectedYear, selectedMonth));
@@ -82,14 +89,6 @@ public class TransactionsController(
         CancellationToken cancellationToken)
     {
         var userId = User.GetRequiredUserId();
-
-        if (request.IsMonthlyIncome && !await dbContext.FinancialProfiles.AnyAsync(
-            profile => profile.UserId == userId && profile.EmploymentType == GestaoFinanceiraPessoal.Api.Domain.Enums.EmploymentType.Pj,
-            cancellationToken))
-        {
-            ModelState.AddModelError(nameof(request.IsMonthlyIncome), "Somente contas PJ podem identificar um recebimento mensal.");
-            return ValidationProblem(ModelState);
-        }
 
         if (request.CategoryId.HasValue)
         {
@@ -196,9 +195,16 @@ public class TransactionsController(
                     ModelState.AddModelError(nameof(request.RecurrenceEndDate), "Este lançamento não é recorrente.");
                     return ValidationProblem(ModelState);
                 }
-                if (transaction.IsMonthlyIncome && request.Date > DateOnly.FromDateTime(DateTime.Today))
+                if ((request.IsMonthlyIncome ?? transaction.IsMonthlyIncome) && request.Date > DateOnly.FromDateTime(DateTime.Today))
                 {
                     ModelState.AddModelError(nameof(request.Date), "A data do recebimento não pode estar no futuro.");
+                    return ValidationProblem(ModelState);
+                }
+                if (request.IsMonthlyIncome == true && (transaction.Type != TransactionType.Income
+                    || transaction.Status != TransactionStatus.Confirmed
+                    || request.Date > DateOnly.FromDateTime(DateTime.Today)))
+                {
+                    ModelState.AddModelError(nameof(request.IsMonthlyIncome), "Marque o recebimento principal apenas em uma receita confirmada e já recebida.");
                     return ValidationProblem(ModelState);
                 }
 
@@ -207,6 +213,10 @@ public class TransactionsController(
                 transaction.Amount = request.Amount;
                 transaction.Date = request.Date;
                 transaction.CategoryId = request.CategoryId;
+                if (request.IsMonthlyIncome.HasValue)
+                {
+                    transaction.IsMonthlyIncome = request.IsMonthlyIncome.Value;
+                }
             }
             else
             {

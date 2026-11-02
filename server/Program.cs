@@ -34,6 +34,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<RecurringTransactionService>();
+builder.Services.AddScoped<MonthlySpendingPlanService>();
 
 builder.Services.AddAntiforgery(options =>
 {

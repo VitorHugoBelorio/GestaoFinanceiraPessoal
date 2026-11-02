@@ -9,6 +9,7 @@ public record DashboardResponse(
     int Month,
     decimal TotalBalance,
     decimal MonthlyIncome,
+    decimal MonthlyPrimaryIncome,
     decimal MonthlyExpense,
     decimal MonthlyBalance,
     bool IncomeReminderDue,
@@ -21,6 +22,10 @@ public record DashboardResponse(
     decimal AvailableBalance,
     decimal? MonthlySpendingPlan,
     decimal? MonthlySpendingRemaining,
+    decimal? MonthlySpendingBaseAmount,
+    decimal MonthlySpendingCarryIn,
+    bool MonthlySpendingCarryOverUnused,
     decimal MonthlyContributions,
+    decimal MonthlyIncomeInvested,
     decimal MonthlyWithdrawals,
     IReadOnlyCollection<InvestmentMovementResponse> MonthlyInvestmentMovements);

@@ -10,6 +10,7 @@ public class InvestmentMovement
     public decimal Amount { get; set; }
     public DateOnly Date { get; set; }
     public string? Note { get; set; }
+    public bool IsFromMonthlyIncome { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public User User { get; set; } = null!;
